@@ -365,6 +365,9 @@ class PlayScene extends Phaser.Scene {
         this.background = this.add.tileSprite(250, 550, 2540, 352, 'backgroundBuildings');
         this.background.setScale(1);
         this.background.setAlpha(1);
+
+        this.brightness = this.add.tileSprite(1250, 360, 2540, 720, 'brightness');
+        this.brightness.setAlpha(0.6);
         
         this.foreground_3 = this.add.tileSprite(950, 545, 2540, 352, 'foreground_3');
         this.foreground_3.setScale(1);
@@ -374,9 +377,6 @@ class PlayScene extends Phaser.Scene {
         
     
         
-        
-        this.brightness = this.add.tileSprite(1250, 360, 2540, 720, 'brightness');
-        this.brightness.setAlpha(0.6);
         this.foreground = this.add.tileSprite(750, 488, 2500, 720, 'foreground');
         this.foreground.setScale(.65);
         this.clouds = this.add.tileSprite(1250, 360, 2540, 720, 'clouds');

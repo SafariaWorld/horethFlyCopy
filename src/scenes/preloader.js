@@ -28,10 +28,12 @@ class PreloadScene extends Phaser.Scene {
 
         this.load.image('topUI', 'assets/topUI.png');
         this.load.image('background', 'assets/newBackground.jpg');
-        this.load.image('backgroundBuildings', 'assets/backgroundBuildings.png');
-        this.load.image('foreground', 'assets/foreground.png');
+        this.load.image('gameBackground', 'assets/farBackground_5.jpg');
+        this.load.image('backgroundBuildings', 'assets/backgroundBuilding_4.png');
+        this.load.image('foreground', 'assets/foreGround_1.png');
         this.load.image('clouds', 'assets/clouds.png');
-        this.load.image('dunes', 'assets/dunes.png');
+        this.load.image('foreground_2', 'assets/foreground_2.png');
+        this.load.image('foreground_3', 'assets/foreground_3.png');
         this.load.image('brightness', 'assets/brightness.png');
         this.load.image('birdsLeft','assets/birdsLeft.png');
         this.load.image('birdsRight','assets/birdsRight.png');

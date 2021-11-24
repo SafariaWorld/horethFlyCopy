@@ -7,8 +7,7 @@ class PlayScene extends Phaser.Scene {
 
     constructor() {
         super('PlayScene');
-       
-
+    
         this.background = null;
         this.backgroundBuildings = null;
         this.foreground = null;
@@ -20,7 +19,8 @@ class PlayScene extends Phaser.Scene {
         this.music = null;
         this.player = null;
         this.playerVersion2 = null; //check on this to replace with original player
-        this.dunes = null;
+        this.foreground_2 = null;
+        this.foreground_3 = null;
 
         //controls
         this.cursors = null;
@@ -55,9 +55,6 @@ class PlayScene extends Phaser.Scene {
         this.armorCollectSound = null;
         this.armorCollected = false;
 
-        
-
-
         //playerDamage Group
         this.playerDamageGroup = null;
         this.horethBall = null;
@@ -67,8 +64,6 @@ class PlayScene extends Phaser.Scene {
         this.maxHorethBall = 1;
         this.currentHorethBallNumber = 0;
         this.bluntImpactSound = null;
-
-        
 
         //score
         this.score = null;
@@ -91,7 +86,6 @@ class PlayScene extends Phaser.Scene {
         this.snakeBoltObject = null;
         this.snakeBoltTracker = 0;
         
-
         //enemy Diamond
         this.patrolDiamond = null;
         this.move1 = false;
@@ -153,7 +147,6 @@ class PlayScene extends Phaser.Scene {
 
         //UI
         this.topUI = this.add.image(0, 360, 'topUI').setOrigin(0, 0.5);
-        //console.log(this.width);
 
         //create screen positions
         this.screenCenterX = (this.cameras.main.worldView.x + this.cameras.main.width / 2) - 13;
@@ -168,14 +161,13 @@ class PlayScene extends Phaser.Scene {
         
     }
 
-    
-
     update() {
-        this.background.tilePositionX += .5;
-        this.foreground.tilePositionX += 3.8;
+        this.background.tilePositionX += 0.2;
+        this.foreground.tilePositionX += 5.8;
         this.sun.tilePositionX += 0.05;
         this.clouds.tilePositionX += 1;
-        this.dunes.tilePositionX += .7;
+        this.foreground_2.tilePositionX += .7;
+        this.foreground_3.tilePositionX += .35;
        
         this.setControls();
         
@@ -361,23 +353,34 @@ class PlayScene extends Phaser.Scene {
     }
 
     createBackground() {
-        this.background = this.add.tileSprite(1550, 340, 2540, 720, 'background');
-        this.background.setScale(.8);
+        this.background = this.add.tileSprite(1250, 340, 3000, 422, 'gameBackground');
+        this.background.setScale(2);
 
-        this.sun = this.add.tileSprite(422, 238, 1200, 600, 'sun');
-        this.sun.setScale(3);
+        
 
-        this.background = this.add.tileSprite(1250, 360, 2540, 720, 'backgroundBuildings');
+        this.sun = this.add.tileSprite(1422, 388, 3000, 422, 'gameBackground');
+        this.sun.setScale(1.7);
+    
+
+        this.background = this.add.tileSprite(250, 550, 2540, 352, 'backgroundBuildings');
         this.background.setScale(1);
-        this.background.setAlpha(0.95);
-        this.dunes = this.add.tileSprite(1050, 220, 2540, 720, 'dunes');
-        this.dunes.setScale(1.4);
+        this.background.setAlpha(1);
+        
+        this.foreground_3 = this.add.tileSprite(950, 545, 2540, 352, 'foreground_3');
+        this.foreground_3.setScale(1);
+
+        this.foreground_2 = this.add.tileSprite(1250, 545, 2540, 352, 'foreground_2');
+        this.foreground_2.setScale(1);
+        
+    
         
         
         this.brightness = this.add.tileSprite(1250, 360, 2540, 720, 'brightness');
         this.brightness.setAlpha(0.6);
-        this.foreground = this.add.tileSprite(1250, 360, 2540, 720, 'foreground');
+        this.foreground = this.add.tileSprite(750, 488, 2500, 720, 'foreground');
+        this.foreground.setScale(.65);
         this.clouds = this.add.tileSprite(1250, 360, 2540, 720, 'clouds');
+        
     }
 
     //------------------------------Fire and Electric Ball and Damage Group ---------------------------//
@@ -395,7 +398,7 @@ class PlayScene extends Phaser.Scene {
             this.newFireBall = {
                 key: 'fireBallAnimation',
                 frames: this.anims.generateFrameNumbers('newFireBall', {start: 0, end: 16, first: 0}),
-                frameRate: 10,
+                frameRate: 9,
                 repeat: -1
             }
     
@@ -414,7 +417,7 @@ class PlayScene extends Phaser.Scene {
             this.newElectricBall = {
                 key: 'electricBallAnimation',
                 frames: this.anims.generateFrameNumbers('newElectricBall', {start:4, end:8, first:4}),
-                frameRate: 7,
+                frameRate: 6,
                 repeat: -1
             }
 
@@ -570,7 +573,7 @@ class PlayScene extends Phaser.Scene {
             this.coins.setScale(.3);
 
             //set collision box
-            this.coins.body.setSize(675,675);
+            this.coins.body.setSize(375,375);
         }
 
         this.collectGroup.setVelocityX(-350);

@@ -158,7 +158,6 @@ class PlayScene extends Phaser.Scene {
 
         // this.createHorethBallCollider();       
         this.createPatrolDiamond();
-        
     }
 
     update() {
@@ -266,8 +265,6 @@ class PlayScene extends Phaser.Scene {
         }
     }
 
-    
-
     afterPatrolDiamondMove() {
 
         //move diamond up 375 pixels
@@ -365,6 +362,9 @@ class PlayScene extends Phaser.Scene {
         this.background = this.add.tileSprite(250, 550, 2540, 352, 'backgroundBuildings');
         this.background.setScale(1);
         this.background.setAlpha(1);
+
+        this.brightness = this.add.tileSprite(1250, 360, 2540, 720, 'brightness');
+        this.brightness.setAlpha(0.6);
         
         this.foreground_3 = this.add.tileSprite(950, 545, 2540, 352, 'foreground_3');
         this.foreground_3.setScale(1);
@@ -374,13 +374,9 @@ class PlayScene extends Phaser.Scene {
         
     
         
-        
-        this.brightness = this.add.tileSprite(1250, 360, 2540, 720, 'brightness');
-        this.brightness.setAlpha(0.6);
         this.foreground = this.add.tileSprite(750, 488, 2500, 720, 'foreground');
         this.foreground.setScale(.65);
         this.clouds = this.add.tileSprite(1250, 360, 2540, 720, 'clouds');
-        
     }
 
     //------------------------------Fire and Electric Ball and Damage Group ---------------------------//
@@ -397,8 +393,8 @@ class PlayScene extends Phaser.Scene {
             
             this.newFireBall = {
                 key: 'fireBallAnimation',
-                frames: this.anims.generateFrameNumbers('newFireBall', {start: 0, end: 16, first: 0}),
-                frameRate: 9,
+                frames: this.anims.generateFrameNumbers('newFireBall', {start: 0, end: 5, first: 0}),
+                frameRate: 5,
                 repeat: -1
             }
     
@@ -406,7 +402,7 @@ class PlayScene extends Phaser.Scene {
            
 
             this.fireball = this.damageGroup.create(this.damageItemDistance, this.damageItemHeight, 'newFireBall').play('fireBallAnimation');
-            this.fireball.setScale(1.3);
+            this.fireball.setScale(.9);
 
             //set collision box
             this.fireball.body.setSize(80,80);
@@ -416,7 +412,7 @@ class PlayScene extends Phaser.Scene {
 
             this.newElectricBall = {
                 key: 'electricBallAnimation',
-                frames: this.anims.generateFrameNumbers('newElectricBall', {start:4, end:8, first:4}),
+                frames: this.anims.generateFrameNumbers('newElectricBall', {start:0, end:8, first:0}),
                 frameRate: 6,
                 repeat: -1
             }
@@ -424,7 +420,7 @@ class PlayScene extends Phaser.Scene {
             this.anims.create(this.newElectricBall);
 
             this.electricball = this.electricGroup.create(this.damageItemDistance, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
-            this.electricball.setScale(1);
+            this.electricball.setScale(.6);
             this.createElectricballMovement(this.electricball.y);
 
 
@@ -435,7 +431,7 @@ class PlayScene extends Phaser.Scene {
             this.damageItemDistance += 200;
             this.damageItemHeight = Math.random() * (600 - 50) + 50;
             this.electricball = this.electricGroup.create(this.damageItemDistance, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
-            this.electricball.setScale(1);
+            this.electricball.setScale(.6);
             this.createElectricballMovement(this.electricball.y);
 
             //set collision box
@@ -445,12 +441,9 @@ class PlayScene extends Phaser.Scene {
         this.damageGroup.setVelocityX(-350);
         this.electricGroup.setVelocityX(-350);
         
-
     }
 
     createElectricballMovement() {
-
-       
 
         if (this.electricball.y > 600) {
             this.electricball.setVelocityY(200);
@@ -461,7 +454,6 @@ class PlayScene extends Phaser.Scene {
     }
 
     checkElectricBallPositionAndMove() {
-        
 
         for (let i = 0; i < this.electricGroup.getChildren().length; i++) {
            
@@ -473,15 +465,13 @@ class PlayScene extends Phaser.Scene {
                     this.electricGroup.getChildren()[i].setVelocityY(-200);
                 }
         }
-
     }
 
     createDamageCollider() {
         
-       
         this.damageCollider = this.physics.add.collider(this.player, this.damageGroup, () => {
             
-               // console.log('add pause');
+                // console.log('add pause');
                 this.physics.pause();
                 this.endScreen();
                     
@@ -612,9 +602,6 @@ class PlayScene extends Phaser.Scene {
             //set collision box
             this.armor.body.setSize(100,100);
         }
-
-
-
         this.collectArmorGroup.setVelocityX(-350);
     }
 

@@ -6,11 +6,14 @@ class TitleScene extends Phaser.Scene {
 
 	preload() {
 		this.load.image('background', 'assets/newBackground.jpg');
+        this.load.image('junglePanelMain', 'assets/junglePanelMain.png');
 	}
 
 	create() {
         const { width, height } = this.sys.game.canvas;
         const bg = this.add.sprite(0,0,'background');
+        let junglePanel = this.add.sprite(170, 10, 'junglePanelMain').setOrigin(0,0);
+        junglePanel.setScale(.45);
 
         bg.setOrigin(0,0);
         const text = this.add.text(width / 2, height / 2, 'START BUTTON IMAGE',

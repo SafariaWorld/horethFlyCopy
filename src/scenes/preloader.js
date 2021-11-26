@@ -27,7 +27,7 @@ class PreloadScene extends Phaser.Scene {
     this.load.audio('theme', 'assets/audio/mainMusic.wav');
 
         this.load.image('topUI', 'assets/topUI.png');
-        this.load.image('background', 'assets/newBackground.jpg');
+       // this.load.image('background', 'assets/newBackground.jpg');
         this.load.image('gameBackground', 'assets/farBackground_5.jpg');
         this.load.image('backgroundBuildings', 'assets/backgroundBuilding_4.png');
         this.load.image('foreground', 'assets/foreGround_1.png');
@@ -46,7 +46,7 @@ class PreloadScene extends Phaser.Scene {
         this.load.image('fireball', 'assets/fireball.png');
         this.load.image('electricball', 'assets/electricball.png');
 
-        this.load.image('coins', 'assets/coin.png');
+        this.load.image('coins', 'assets/coinFinal.png');
         this.load.image('horethBall','assets/horethBall.png');
         this.load.audio('bluntImpactSound', 'assets/audio/bluntImpactSound.mp3');
 
@@ -58,19 +58,19 @@ class PreloadScene extends Phaser.Scene {
         this.load.spritesheet('snake', 'assets/snakeSpriteSheet.png', { frameWidth: 330, frameHeight: 165 });
         this.load.image('patrolDiamond', 'assets/patrolDiamond.png');
 
-        this.load.spritesheet("newFireBall", "assets/newFireBall.png", { frameWidth: 150, frameHeight: 150 });
-        this.load.spritesheet("newElectricBall", "assets/newElectricBall.png", { frameWidth: 150, frameHeight: 150 });
+        this.load.spritesheet("newFireBall", "assets/fireBallSpriteSheet.png", { frameWidth: 225, frameHeight: 150 });
+        this.load.spritesheet("newElectricBall", "assets/electricBallSpriteSheet.png", { frameWidth: 169, frameHeight: 169 });
         this.load.spritesheet("snakeBolt","assets/snakeBolt.png", { frameWidth: 200, frameHeight: 60});
 
 
 
         this.load.audio('orbSound', 'assets/audio/spell.mp3');
-        this.load.audio('goldCollectSound', 'assets/audio/coinNew.wav')
+        this.load.audio('goldCollectSound', 'assets/audio/coinNew.wav');
 
         
 
         const fonts = new WebFontFile(this.load, 'Abel')
-		this.load.addFile(fonts);
+		  this.load.addFile(fonts);
     //ALL LOADS BETWEEN COMMENTS
 
 

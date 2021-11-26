@@ -46,6 +46,8 @@ class PlayScene extends Phaser.Scene {
         this.collectItemDistance = null;
         this.coins = null;
         this.goldCollectSound = null;
+        this.coinsAnimation = null;
+        this.newCoins = null;
 
         //collect armor group
         this.armorGroup = null;
@@ -557,12 +559,27 @@ class PlayScene extends Phaser.Scene {
         this.collectItemDistance = 800;
 
         for (let i = 0; i < 50; i++) {
+
+            this.newCoins = {
+                key: 'coinAnimation',
+                frames: this.anims.generateFrameNumbers('coinAnimated', {start: 0, end: 4, first: 0}),
+                frameRate: 4,
+                repeat: -1
+            }
+    
+            this.anims.create(this.newCoins);
+           
+
+            
+
             this.collectItemHeight = Math.random() * (600 - 50) + 50;
             this.collectItemDistance += 800;
-            this.coins = this.collectGroup.create(this.collectItemDistance, this.collectItemHeight, 'coins');
+            this.coins = this.collectGroup.create(this.collectItemDistance, this.collectItemHeight, 'newCoins').play('coinAnimation');
             this.coins.setScale(.3);
+            // this.coins = this.collectGroup.create(this.collectItemDistance, this.collectItemHeight, 'coins');
+            // this.coins.setScale(.3);
 
-            //set collision box
+            // //set collision box
             this.coins.body.setSize(375,375);
         }
 

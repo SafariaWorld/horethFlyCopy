@@ -53,6 +53,9 @@ class PreloadScene extends Phaser.Scene {
         //armor
         this.load.image('armor','assets/shield.png');
 
+        //coin 
+        this.load.spritesheet('coinAnimated', 'assets/coinFinalSpriteSheet.png',{ frameWidth: 150, frameHeight: 150 });
+
         //this.load.image('snake','assets/snake.png');
     
         this.load.spritesheet('snake', 'assets/snakeSpriteSheet.png', { frameWidth: 330, frameHeight: 165 });

@@ -27,6 +27,14 @@ class PreloadScene extends Phaser.Scene {
     this.load.audio('theme', 'assets/audio/mainMusic.wav');
 
         this.load.image('topUI', 'assets/topUI.png');
+
+      //start UI
+      this.load.image('junglePanelMain', 'assets/junglePanelMain.png');
+      this.load.image('losePanel', 'assets/losePanel.png');
+
+      //end UI
+      this.load.image('button', 'assets/button.png');
+
        // this.load.image('background', 'assets/newBackground.jpg');
         this.load.image('gameBackground', 'assets/farBackground_5.jpg');
         this.load.image('backgroundBuildings', 'assets/backgroundBuilding_4.png');
@@ -54,7 +62,8 @@ class PreloadScene extends Phaser.Scene {
         this.load.image('armor','assets/shield.png');
 
         //coin 
-        this.load.spritesheet('coinAnimated', 'assets/coinFinalSpriteSheet.png',{ frameWidth: 150, frameHeight: 150 });
+        this.load.spritesheet('coinAnimated', 'assets/coinGoldSpriteSheet.png',{ frameWidth: 84, frameHeight: 84 });
+        
 
         //this.load.image('snake','assets/snake.png');
     

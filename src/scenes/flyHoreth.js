@@ -68,7 +68,7 @@ class PlayScene extends Phaser.Scene {
         this.bluntImpactSound = null;
 
         //score
-        this.score = null;
+        this.score = 0;
         this.scoreText = null;
 
         //font
@@ -76,6 +76,7 @@ class PlayScene extends Phaser.Scene {
 
         //UI
         this.topUI = null;
+        this.button = null;
 
         //enemies
         this.snake = null;
@@ -119,6 +120,9 @@ class PlayScene extends Phaser.Scene {
         //camera position
         this.screenCenterX = null;
         this.screenCenterY = null;
+
+        this.junglePanelLost = null;
+
     }
 
     
@@ -388,7 +392,7 @@ class PlayScene extends Phaser.Scene {
 
         this.damageItemDistance = 1000;
 
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 45; i++) {
 
             this.damageItemDistance += 400;
             this.damageItemHeight = Math.random() * (600 - 50) + 50;
@@ -558,7 +562,7 @@ class PlayScene extends Phaser.Scene {
 
         this.collectItemDistance = 800;
 
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 45; i++) {
 
             this.newCoins = {
                 key: 'coinAnimation',
@@ -575,7 +579,7 @@ class PlayScene extends Phaser.Scene {
             this.collectItemHeight = Math.random() * (600 - 50) + 50;
             this.collectItemDistance += 800;
             this.coins = this.collectGroup.create(this.collectItemDistance, this.collectItemHeight, 'newCoins').play('coinAnimation');
-            this.coins.setScale(.3);
+            this.coins.setScale(.5);
             // this.coins = this.collectGroup.create(this.collectItemDistance, this.collectItemHeight, 'coins');
             // this.coins.setScale(.3);
 
@@ -896,16 +900,32 @@ class PlayScene extends Phaser.Scene {
         
         const { width, height } = this.sys.game.canvas;
 
-        this.add.text(width / 2, height / 2 - 150, 'Your Score: ' + this.score, 
+        this.junglePanelLost = this.add.sprite(width/2 - 195, 100, 'losePanel').setOrigin(0,0);
+        this.junglePanelLost.setScale(1.24);
+    
+
+        this.add.text(width / 2 + 20, height / 2 - 140, 'Your Score: ', 
+        { fill: '#000000', fontSize: '40px'})
+            .setInteractive()
+            .setOrigin(.5, 0);
+
+         this.add.text(width / 2 + 10, height / 2 - 50, '' + this.score, 
         { fill: '#000000', fontSize: '60px'})
             .setInteractive()
             .setOrigin(.5, 0);
 
-        this.add.text(width / 2, height / 2, 'PLAY AGAIN BUTTON IMAGE', 
+        this.button = this.add.sprite(width/2 -108,height/2 + 125, "button").setOrigin(0,0); 
+        this.button.setScale(.8);  
+        this.button.setInteractive().on('pointerdown', () => this.restart(), this)
+        
+
+        this.add.text(width / 2 + 5, height / 2 + 150, 'PLAY AGAIN', 
         { fill: '#000000', fontSize: '30px'})
             .setInteractive()
             .setOrigin(.5, 0)
             .on('pointerdown', () => this.restart(), this);
+
+          
     }
 
     restart(event) {

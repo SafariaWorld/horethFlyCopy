@@ -10,10 +10,10 @@ class TitleScene extends Phaser.Scene {
 
 	preload() {
 		this.load.image('background', 'assets/newBackground.jpg');
-        this.load.image('junglePanelMain', 'assets/junglePanelMain.png');
         this.load.image('startButtonMenu', 'assets/startButtonMenu.png');
         this.load.image('sun', 'assets/sun.png');
         this.load.image('foregroundTitle', 'assets/foreground_3.png');
+
 	}
 
 	create() {
@@ -35,6 +35,7 @@ class TitleScene extends Phaser.Scene {
 
         let junglePanelButton = this.add.sprite(width / 2 + 200, height / 2 - 140, 'startButtonMenu').setOrigin(0,0);
         junglePanelButton.setScale(.8);
+        junglePanelButton.setInteractive({ useHandCursor: true }).on('pointerdown', () => this.loadGame(), this);
 
 
 
@@ -44,8 +45,8 @@ class TitleScene extends Phaser.Scene {
             .setInteractive({ useHandCursor: true })
             .setOrigin(.5, 0);
 
-        text.on('pointerdown', this.loadGame, this)
-	}
+        text.on('pointerdown', this.loadGame, this);
+	};
 
     loadGame() {
         this.scene.switch('PlayScene');

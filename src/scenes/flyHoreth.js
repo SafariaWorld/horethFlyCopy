@@ -46,6 +46,8 @@ class PlayScene extends Phaser.Scene {
         this.collectItemDistance = null;
         this.coins = null;
         this.goldCollectSound = null;
+        this.coinsAnimation = null;
+        this.newCoins = null;
 
         //collect armor group
         this.armorGroup = null;
@@ -66,7 +68,7 @@ class PlayScene extends Phaser.Scene {
         this.bluntImpactSound = null;
 
         //score
-        this.score = null;
+        this.score = 0;
         this.scoreText = null;
 
         //font
@@ -74,6 +76,7 @@ class PlayScene extends Phaser.Scene {
 
         //UI
         this.topUI = null;
+        this.button = null;
 
         //enemies
         this.snake = null;
@@ -117,6 +120,9 @@ class PlayScene extends Phaser.Scene {
         //camera position
         this.screenCenterX = null;
         this.screenCenterY = null;
+
+        this.junglePanelLost = null;
+
     }
 
     
@@ -158,7 +164,6 @@ class PlayScene extends Phaser.Scene {
 
         // this.createHorethBallCollider();       
         this.createPatrolDiamond();
-        
     }
 
     update() {
@@ -265,8 +270,6 @@ class PlayScene extends Phaser.Scene {
             })
         }
     }
-
-    
 
     afterPatrolDiamondMove() {
 
@@ -380,7 +383,6 @@ class PlayScene extends Phaser.Scene {
         this.foreground = this.add.tileSprite(750, 488, 2500, 720, 'foreground');
         this.foreground.setScale(.65);
         this.clouds = this.add.tileSprite(1250, 360, 2540, 720, 'clouds');
-        
     }
 
     //------------------------------Fire and Electric Ball and Damage Group ---------------------------//
@@ -390,15 +392,15 @@ class PlayScene extends Phaser.Scene {
 
         this.damageItemDistance = 1000;
 
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 45; i++) {
 
             this.damageItemDistance += 400;
             this.damageItemHeight = Math.random() * (600 - 50) + 50;
             
             this.newFireBall = {
                 key: 'fireBallAnimation',
-                frames: this.anims.generateFrameNumbers('newFireBall', {start: 0, end: 16, first: 0}),
-                frameRate: 9,
+                frames: this.anims.generateFrameNumbers('newFireBall', {start: 0, end: 5, first: 0}),
+                frameRate: 5,
                 repeat: -1
             }
     
@@ -406,7 +408,7 @@ class PlayScene extends Phaser.Scene {
            
 
             this.fireball = this.damageGroup.create(this.damageItemDistance, this.damageItemHeight, 'newFireBall').play('fireBallAnimation');
-            this.fireball.setScale(1.3);
+            this.fireball.setScale(.9);
 
             //set collision box
             this.fireball.body.setSize(80,80);
@@ -416,7 +418,7 @@ class PlayScene extends Phaser.Scene {
 
             this.newElectricBall = {
                 key: 'electricBallAnimation',
-                frames: this.anims.generateFrameNumbers('newElectricBall', {start:4, end:8, first:4}),
+                frames: this.anims.generateFrameNumbers('newElectricBall', {start:0, end:8, first:0}),
                 frameRate: 6,
                 repeat: -1
             }
@@ -424,7 +426,7 @@ class PlayScene extends Phaser.Scene {
             this.anims.create(this.newElectricBall);
 
             this.electricball = this.electricGroup.create(this.damageItemDistance, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
-            this.electricball.setScale(1);
+            this.electricball.setScale(.6);
             this.createElectricballMovement(this.electricball.y);
 
 
@@ -435,7 +437,7 @@ class PlayScene extends Phaser.Scene {
             this.damageItemDistance += 200;
             this.damageItemHeight = Math.random() * (600 - 50) + 50;
             this.electricball = this.electricGroup.create(this.damageItemDistance, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
-            this.electricball.setScale(1);
+            this.electricball.setScale(.6);
             this.createElectricballMovement(this.electricball.y);
 
             //set collision box
@@ -445,12 +447,9 @@ class PlayScene extends Phaser.Scene {
         this.damageGroup.setVelocityX(-350);
         this.electricGroup.setVelocityX(-350);
         
-
     }
 
     createElectricballMovement() {
-
-       
 
         if (this.electricball.y > 600) {
             this.electricball.setVelocityY(200);
@@ -461,7 +460,6 @@ class PlayScene extends Phaser.Scene {
     }
 
     checkElectricBallPositionAndMove() {
-        
 
         for (let i = 0; i < this.electricGroup.getChildren().length; i++) {
            
@@ -473,15 +471,13 @@ class PlayScene extends Phaser.Scene {
                     this.electricGroup.getChildren()[i].setVelocityY(-200);
                 }
         }
-
     }
 
     createDamageCollider() {
         
-       
         this.damageCollider = this.physics.add.collider(this.player, this.damageGroup, () => {
             
-               // console.log('add pause');
+                // console.log('add pause');
                 this.physics.pause();
                 this.endScreen();
                     
@@ -566,13 +562,28 @@ class PlayScene extends Phaser.Scene {
 
         this.collectItemDistance = 800;
 
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 45; i++) {
+
+            this.newCoins = {
+                key: 'coinAnimation',
+                frames: this.anims.generateFrameNumbers('coinAnimated', {start: 0, end: 4, first: 0}),
+                frameRate: 4,
+                repeat: -1
+            }
+    
+            this.anims.create(this.newCoins);
+           
+
+            
+
             this.collectItemHeight = Math.random() * (600 - 50) + 50;
             this.collectItemDistance += 800;
-            this.coins = this.collectGroup.create(this.collectItemDistance, this.collectItemHeight, 'coins');
-            this.coins.setScale(.3);
+            this.coins = this.collectGroup.create(this.collectItemDistance, this.collectItemHeight, 'newCoins').play('coinAnimation');
+            this.coins.setScale(.5);
+            // this.coins = this.collectGroup.create(this.collectItemDistance, this.collectItemHeight, 'coins');
+            // this.coins.setScale(.3);
 
-            //set collision box
+            // //set collision box
             this.coins.body.setSize(375,375);
         }
 
@@ -612,9 +623,6 @@ class PlayScene extends Phaser.Scene {
             //set collision box
             this.armor.body.setSize(100,100);
         }
-
-
-
         this.collectArmorGroup.setVelocityX(-350);
     }
 
@@ -892,16 +900,32 @@ class PlayScene extends Phaser.Scene {
         
         const { width, height } = this.sys.game.canvas;
 
-        this.add.text(width / 2, height / 2 - 150, 'Your Score: ' + this.score, 
+        this.junglePanelLost = this.add.sprite(width/2 - 195, 100, 'losePanel').setOrigin(0,0);
+        this.junglePanelLost.setScale(1.24);
+    
+
+        this.add.text(width / 2 + 20, height / 2 - 140, 'Your Score: ', 
+        { fill: '#000000', fontSize: '40px'})
+            .setInteractive()
+            .setOrigin(.5, 0);
+
+         this.add.text(width / 2 + 10, height / 2 - 50, '' + this.score, 
         { fill: '#000000', fontSize: '60px'})
             .setInteractive()
             .setOrigin(.5, 0);
 
-        this.add.text(width / 2, height / 2, 'PLAY AGAIN BUTTON IMAGE', 
+        this.button = this.add.sprite(width/2 -108,height/2 + 125, "button").setOrigin(0,0); 
+        this.button.setScale(.8);  
+        this.button.setInteractive().on('pointerdown', () => this.restart(), this)
+        
+
+        this.add.text(width / 2 + 5, height / 2 + 150, 'PLAY AGAIN', 
         { fill: '#000000', fontSize: '30px'})
             .setInteractive()
             .setOrigin(.5, 0)
             .on('pointerdown', () => this.restart(), this);
+
+          
     }
 
     restart(event) {

@@ -21,6 +21,7 @@ class PlayScene extends Phaser.Scene {
         this.playerVersion2 = null; //check on this to replace with original player
         this.foreground_2 = null;
         this.foreground_3 = null;
+        this.fireBallCount = 0;
 
         //controls
         this.cursors = null;
@@ -173,7 +174,15 @@ class PlayScene extends Phaser.Scene {
         this.clouds.tilePositionX += 1;
         this.foreground_2.tilePositionX += .7;
         this.foreground_3.tilePositionX += .35;
+
+        console.log(this.damageGroup.getChildren(5));
+        
        
+        if (this.player.x > this.damageGroup.getChildren(this.fireBallCount).x) {
+            this.endScreen();
+        }
+
+
         this.setControls();
         
         if(this.horethBall) {
@@ -392,7 +401,7 @@ class PlayScene extends Phaser.Scene {
 
         this.damageItemDistance = 1000;
 
-        for (let i = 0; i < 45; i++) {
+        for (let i = 0; i < 5; i++) {
 
             this.damageItemDistance += 400;
             this.damageItemHeight = Math.random() * (600 - 50) + 50;
@@ -412,6 +421,7 @@ class PlayScene extends Phaser.Scene {
 
             //set collision box
             this.fireball.body.setSize(80,80);
+            this.fireBallCount += 1;
 
             this.damageItemDistance += 200;
             this.damageItemHeight = Math.random() * (600 - 50) + 50;
@@ -562,7 +572,7 @@ class PlayScene extends Phaser.Scene {
 
         this.collectItemDistance = 800;
 
-        for (let i = 0; i < 45; i++) {
+        for (let i = 0; i < 5; i++) {
 
             this.newCoins = {
                 key: 'coinAnimation',

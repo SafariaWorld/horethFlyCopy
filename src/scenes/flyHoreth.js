@@ -894,7 +894,19 @@ class PlayScene extends Phaser.Scene {
         this.move2 = false;
     }
 
-    endScreen() {
+    async endScreen() {
+
+        //API call to save score, create config in future
+        await fetch('http://localhost:8080/leaderboard', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            mode: 'cors',
+            body: JSON.stringify({ score : this.score, name: "test" })
+        })
+        .then(response => response.json())
+        .catch(error => console.error('Error:', error))
 
         this.resetVariables();
         

@@ -1,9 +1,11 @@
 const { MongoClient } = require("mongodb");
-const connectionString = process.env.MONGODB_URI || "mongodb://localhost:27017/horethfly";
+const connectionString = process.env.MONGODB_URI || "mongodb+srv://brian:Lfifteenf123!@horethflydatabase1.8xeap.mongodb.net/myFirstDatabase?";
 const client = new MongoClient(connectionString, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+
+
 
 let dbConnection;
 

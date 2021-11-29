@@ -3,6 +3,8 @@ const dbo = require('../db/conn');
 
 const leaderboardRouter = express.Router();
 
+console.log("leaderboard has been run");
+
 leaderboardRouter.route('/').get(async function(req, res) {
   const dbConnect = dbo.getDb();
   dbConnect

@@ -7,6 +7,9 @@ class PlayScene extends Phaser.Scene {
 
     constructor() {
         super('PlayScene');
+
+        //test API
+        let g = null;
     
         this.background = null;
         this.backgroundBuildings = null;
@@ -165,7 +168,7 @@ class PlayScene extends Phaser.Scene {
 
         // this.createHorethBallCollider();       
         this.createPatrolDiamond();
-        //this.testfetch();
+        let g = this.testFetch();
     }
 
     update() {
@@ -906,19 +909,36 @@ class PlayScene extends Phaser.Scene {
         this.move2 = false;
     }
 
-    // testfetch() {
-    //     console.log('test fetch');
-    //     fetch('http://localhost:8080/leaderboard', {
-    //         method: 'GET',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         mode: 'cors'
-    //     })
-    //     .then(res => res.json())
-    //     .then(data => console.log(data))
-    //     .catch(error => console.error('Error:', error))
-    // }
+    async testFetch() {
+        //method 1
+        // console.log('test fetch');
+        // fetch('http://localhost:8080/leaderboard', {
+        //     method: 'GET',
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     },
+        //     mode: 'cors'
+        // })
+        // .then(res => res.json())
+        // //.then(data => console.log(data[1]))
+        // .catch(error => console.error('Error:', error))
+
+
+        //method 2
+        // let response = await fetch('http://localhost:8080/leaderboard');
+        // let scores = await response.json();
+        
+
+        // return await scores;
+
+        //method 3
+        let scores = await fetch('http://localhost:8080/leaderboard').then(response => {
+            console.log(response);
+            console.log(response.json());
+            return response.json;
+        })
+
+    }
 
     async endScreen() {
 
@@ -938,6 +958,11 @@ class PlayScene extends Phaser.Scene {
         this.resetVariables();
         
         const { width, height } = this.sys.game.canvas;
+        
+        //print scores
+        this.testFetch();
+        console.log(g, "g test 2");
+        console.log('test3')
 
         this.junglePanelLost = this.add.sprite(width/2 - 195, 100, 'losePanel').setOrigin(0,0);
         this.junglePanelLost.setScale(1.24);

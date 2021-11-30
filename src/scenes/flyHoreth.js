@@ -135,7 +135,7 @@ class PlayScene extends Phaser.Scene {
 
     create() {
         this.music = this.sound.add('theme', {volume: 0.2});
-        this.music.play();
+        //this.music.play();
         this.createBackground();
         this.createPlayer();
         this.createCursorAndKeyUpKeyDown();
@@ -165,6 +165,7 @@ class PlayScene extends Phaser.Scene {
 
         // this.createHorethBallCollider();       
         this.createPatrolDiamond();
+        //this.testfetch();
     }
 
     update() {
@@ -175,7 +176,8 @@ class PlayScene extends Phaser.Scene {
         this.foreground_2.tilePositionX += .7;
         this.foreground_3.tilePositionX += .35;
 
-        console.log(this.damageGroup.getChildren(5));
+        //console.log(this.damageGroup.getChildren(5));
+    
         
        
         if (this.player.x > this.damageGroup.getChildren(this.fireBallCount).x) {
@@ -904,6 +906,20 @@ class PlayScene extends Phaser.Scene {
         this.move2 = false;
     }
 
+    // testfetch() {
+    //     console.log('test fetch');
+    //     fetch('http://localhost:8080/leaderboard', {
+    //         method: 'GET',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         mode: 'cors'
+    //     })
+    //     .then(res => res.json())
+    //     .then(data => console.log(data))
+    //     .catch(error => console.error('Error:', error))
+    // }
+
     async endScreen() {
 
         //API call to save score, create config in future
@@ -915,7 +931,8 @@ class PlayScene extends Phaser.Scene {
             mode: 'cors',
             body: JSON.stringify({ score : this.score, name: "test" })
         })
-        .then(response => response.json())
+        .then(res => res.json())
+        .then(data => console.log(data))
         .catch(error => console.error('Error:', error))
 
         this.resetVariables();

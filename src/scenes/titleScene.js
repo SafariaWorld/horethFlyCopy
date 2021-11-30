@@ -24,6 +24,8 @@ class TitleScene extends Phaser.Scene {
         this.sun = this.add.tileSprite(650, 450, 1250, 500, 'sun');
         this.sun.setScale(2)
 
+        //console.log('test 1');
+
         this.cloudsTitle = this.add.tileSprite(850, 50, 1280, 720, 'clouds');
         this.cloudsTitle.setScale(1);
 
@@ -37,7 +39,7 @@ class TitleScene extends Phaser.Scene {
         junglePanelButton.setScale(.8);
         junglePanelButton.setInteractive({ useHandCursor: true }).on('pointerdown', () => this.loadGame(), this);
 
-
+        
 
         
         const text = this.add.text(width / 2 * 1.65, height / 2 + 60, 'START',
@@ -46,10 +48,12 @@ class TitleScene extends Phaser.Scene {
             .setOrigin(.5, 0);
 
         text.on('pointerdown', this.loadGame, this);
+
 	};
 
     loadGame() {
         this.scene.switch('PlayScene');
+      
     }
 
     update() {
@@ -57,6 +61,7 @@ class TitleScene extends Phaser.Scene {
         this.foregroundTitle.tilePositionX += 3;
         this.cloudsTitle.tilePositionX += 1
     }
+
 }
 
 export default TitleScene;

@@ -168,7 +168,7 @@ class PlayScene extends Phaser.Scene {
 
         // this.createHorethBallCollider();       
         this.createPatrolDiamond();
-        let g = this.testFetch();
+        // let g = this.testFetch();
     }
 
     update() {
@@ -909,60 +909,62 @@ class PlayScene extends Phaser.Scene {
         this.move2 = false;
     }
 
-    async testFetch() {
+    // async testFetch() {
 
-        let hiScoreArray = [];
-        //method 1
-        console.log('test fetch line 916');
-        fetch('http://localhost:8080/leaderboard', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            mode: 'cors'
-        })
-        .then(res => res.json())
-        .then(data => {
-            hiScoreArray = this.displayHiScore(data)
-        })
-        .catch(error => console.error('Error:', error))
+    //     let hiScoreArray = [];
+    //     //method 1
+    //     console.log('test fetch line 916');
+    //     fetch('http://localhost:8080/leaderboard', {
+    //         method: 'GET',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         mode: 'cors'
+    //     })
+    //     .then(res => res.json())
+    //     .then(data => {
+    //         console.log(data, "data in testFetch");
+    //         console.log(this.displayHiScore(data), "more data in testFetch");
+    //         return  this.displayHiScore(data);
+    //     })
+    //     .catch(error => console.error('Error:', error))
 
-        
-        
-
-        return await hiScoreArray;
-        //method 2
-        // let response = await fetch('http://localhost:8080/leaderboard');
-        // let scores = await response.json();
+    
         
 
-        // return await scores;
+        
+    //     //method 2
+    //     // let response = await fetch('http://localhost:8080/leaderboard');
+    //     // let scores = await response.json();
+        
 
-        //method 3
-        // let scores = await fetch('http://localhost:8080/leaderboard').then(response => {
-        //     console.log(response);
-        //     //print scores
-        //     let returnVariable = this.printData(response.json());
-        //     return returnVariable;
-        // })
+    //     // return await scores;
 
-    }
+    //     //method 3
+    //     // let scores = await fetch('http://localhost:8080/leaderboard').then(response => {
+    //     //     console.log(response);
+    //     //     //print scores
+    //     //     let returnVariable = this.printData(response.json());
+    //     //     return returnVariable;
+    //     // })
 
-    displayHiScore(data) {
+    // }
 
-        console.log(data, "from displayHiScore Function line 951");
-        let scoreArray = [];
+    // displayHiScore(data) {
 
-        for (let i = 0; i < data.length; i++) {
-            // console.log(data[i].name, "- name");
-            // console.log(data[i].score, "- score");
-            scoreArray[i] = new Array(data[i].name, data[i].score);
-        }
-        console.log('error');
-        console.log(scoreArray, 'scoreArray line 960');
+    //     console.log(data, "from displayHiScore Function line 951");
+    //     let scoreArray = [];
 
-        return scoreArray;
-    }
+    //     for (let i = 0; i < data.length; i++) {
+    //         // console.log(data[i].name, "- name");
+    //         // console.log(data[i].score, "- score");
+    //         scoreArray[i] = new Array(data[i].name, data[i].score);
+    //     }
+    //     console.log('error');
+    //     console.log(scoreArray, 'scoreArray line 960');
+
+    //     return scoreArray;
+    // }
 
 
     async endScreen() {
@@ -985,36 +987,78 @@ class PlayScene extends Phaser.Scene {
         
         
         const { width, height } = this.sys.game.canvas;
+
+
+        //*************HISCORE PANEL***************
+
+        let hiScorePanel = this.add.sprite(width/2 - 610, 130, 'hiScorePanel').setOrigin(0,0);
+        hiScorePanel.setScale(.8);
+
+        let hiScoreArray = [];
+
+        let scoreIncrement = -95
+        let scoreWidthIncrement = 140;
+
+        //get hiscore data and print to screen
+        fetch('http://localhost:8080/leaderboard', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            mode: 'cors'
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data, "data in testFetch");    
+            
+            for (let i = 0; i <= data.length; i++) {
+                this.add.text(width / 7 - 20, height / 2 + scoreIncrement, data[i].name, 
+                    { fill: '#000000', fontSize: '30px'})
+                    .setInteractive()
+                    .setOrigin(.5, 0);
         
-        console.log('before endscreen test fetch');
-        let hiScoreBoard = await this.testFetch();
-        console.log('hiScoreBoard =', await hiScoreBoard);
+                    this.add.text(width / 5 + scoreWidthIncrement, height / 2 + scoreIncrement, data[i].score, 
+                    { fill: '#000000', fontSize: '30px'})
+                    .setInteractive()
+                    .setOrigin(.5, 0);
+
+                    scoreIncrement += 25;
+            }
+            
+
+        })
+        .catch(error => console.error('Error:', error))
+        
 
 
 
         // console.log(g, "g test 2");
         // console.log('test3')
 
-        this.junglePanelLost = this.add.sprite(width/2 - 195, 100, 'losePanel').setOrigin(0,0);
-        this.junglePanelLost.setScale(1.24);
+        let widthIncrement = 40;
+        let heightIncrement = 15;
+
+        //*************PLAYER SCORE PANEL************
+        this.junglePanelLost = this.add.sprite(width/2 + 195 + widthIncrement, 100 + heightIncrement, 'losePanel').setOrigin(0,0);
+        this.junglePanelLost.setScale(1.1);
     
 
-        this.add.text(width / 2 + 20, height / 2 - 140, 'Your Score: ', 
+        this.add.text(width / 2 + 390 + widthIncrement, height / 2 - 140 + heightIncrement, 'Your Score: ', 
         { fill: '#000000', fontSize: '40px'})
             .setInteractive()
             .setOrigin(.5, 0);
 
-         this.add.text(width / 2 + 10, height / 2 - 50, '' + this.score, 
+         this.add.text(width / 2 + 380 + widthIncrement, height / 2 - 50 + heightIncrement, '' + this.score, 
         { fill: '#000000', fontSize: '60px'})
             .setInteractive()
             .setOrigin(.5, 0);
 
-        this.button = this.add.sprite(width/2 -108,height/2 + 125, "button").setOrigin(0,0); 
+        this.button = this.add.sprite(width/2 + 257 + widthIncrement,height/2 + 55 + heightIncrement, "button").setOrigin(0,0); 
         this.button.setScale(.8);  
         this.button.setInteractive().on('pointerdown', () => this.restart(), this)
         
 
-        this.add.text(width / 2 + 5, height / 2 + 150, 'PLAY AGAIN', 
+        this.add.text(width / 2 + 370 + widthIncrement, height / 2 + 80 + heightIncrement, 'PLAY AGAIN', 
         { fill: '#000000', fontSize: '30px'})
             .setInteractive()
             .setOrigin(.5, 0)

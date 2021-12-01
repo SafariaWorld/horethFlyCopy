@@ -34,6 +34,7 @@ class PreloadScene extends Phaser.Scene {
 
       //end UI
       this.load.image('button', 'assets/button.png');
+      this.load.image('hiScorePanel', 'assets/hiScorePanel.png');
 
        // this.load.image('background', 'assets/newBackground.jpg');
         this.load.image('gameBackground', 'assets/farBackground_5.jpg');

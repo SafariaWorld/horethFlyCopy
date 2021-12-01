@@ -9,7 +9,7 @@ leaderboardRouter.route('/').get(async function(req, res) {
   const dbConnect = dbo.getDb();
   dbConnect
     .collection('scores')
-    .find({}).limit(5)
+    .find({}).limit(10)
     .sort({ score: -1 })
     .toArray(function(err, result) {
       if (err) throw res.status(400).send("G:Leaderboard Error");

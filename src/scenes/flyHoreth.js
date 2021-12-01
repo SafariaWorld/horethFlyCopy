@@ -1012,7 +1012,7 @@ class PlayScene extends Phaser.Scene {
             console.log(data, "data in testFetch");    
             
             for (let i = 0; i <= data.length; i++) {
-                this.add.text(width / 7 - 20, height / 2 + scoreIncrement, data[i].name, 
+                this.add.text(width / 7 - 20, height / 2 + scoreIncrement, (i + 1) + "." + data[i].name, 
                     { fill: '#000000', fontSize: '30px'})
                     .setInteractive()
                     .setOrigin(.5, 0);

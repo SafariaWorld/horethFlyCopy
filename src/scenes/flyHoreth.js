@@ -856,7 +856,7 @@ class PlayScene extends Phaser.Scene {
             this.player.setVelocityX(625);            
         } 
         else if (this.keyUP.isDown) {
-            console.log(this.armorCollected);
+            //console.log(this.armorCollected);
             this.player.setVelocityY(-325);
             if (this.armorCollected == false) {
                 this.player.setFrame(0);
@@ -868,7 +868,7 @@ class PlayScene extends Phaser.Scene {
         }
         else if (this.keyDOWN.isDown) {
             this.player.setVelocityY(325);
-            console.log(this.armorCollected);
+            //console.log(this.armorCollected);
             if (this.armorCollected == false) {
                 this.player.setFrame(2);
             }
@@ -910,20 +910,27 @@ class PlayScene extends Phaser.Scene {
     }
 
     async testFetch() {
+
+        let hiScoreArray = [];
         //method 1
-        // console.log('test fetch');
-        // fetch('http://localhost:8080/leaderboard', {
-        //     method: 'GET',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     mode: 'cors'
-        // })
-        // .then(res => res.json())
-        // //.then(data => console.log(data[1]))
-        // .catch(error => console.error('Error:', error))
+        console.log('test fetch line 916');
+        fetch('http://localhost:8080/leaderboard', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            mode: 'cors'
+        })
+        .then(res => res.json())
+        .then(data => {
+            hiScoreArray = this.displayHiScore(data)
+        })
+        .catch(error => console.error('Error:', error))
 
+        
+        
 
+        return await hiScoreArray;
         //method 2
         // let response = await fetch('http://localhost:8080/leaderboard');
         // let scores = await response.json();
@@ -932,17 +939,36 @@ class PlayScene extends Phaser.Scene {
         // return await scores;
 
         //method 3
-        let scores = await fetch('http://localhost:8080/leaderboard').then(response => {
-            console.log(response);
-            console.log(response.json());
-            return response.json;
-        })
+        // let scores = await fetch('http://localhost:8080/leaderboard').then(response => {
+        //     console.log(response);
+        //     //print scores
+        //     let returnVariable = this.printData(response.json());
+        //     return returnVariable;
+        // })
 
     }
+
+    displayHiScore(data) {
+
+        console.log(data, "from displayHiScore Function line 951");
+        let scoreArray = [];
+
+        for (let i = 0; i < data.length; i++) {
+            // console.log(data[i].name, "- name");
+            // console.log(data[i].score, "- score");
+            scoreArray[i] = new Array(data[i].name, data[i].score);
+        }
+        console.log('error');
+        console.log(scoreArray, 'scoreArray line 960');
+
+        return scoreArray;
+    }
+
 
     async endScreen() {
 
         //API call to save score, create config in future
+        console.log('fetch in endscreen line 969');
         await fetch('http://localhost:8080/leaderboard', {
             method: 'POST',
             headers: {
@@ -952,17 +978,22 @@ class PlayScene extends Phaser.Scene {
             body: JSON.stringify({ score : this.score, name: "test" })
         })
         .then(res => res.json())
-        .then(data => console.log(data))
+        .then(data => console.log(data, "this is data from POST"))
         .catch(error => console.error('Error:', error))
 
         this.resetVariables();
         
+        
         const { width, height } = this.sys.game.canvas;
         
-        //print scores
-        this.testFetch();
-        console.log(g, "g test 2");
-        console.log('test3')
+        console.log('before endscreen test fetch');
+        let hiScoreBoard = await this.testFetch();
+        console.log('hiScoreBoard =', await hiScoreBoard);
+
+
+
+        // console.log(g, "g test 2");
+        // console.log('test3')
 
         this.junglePanelLost = this.add.sprite(width/2 - 195, 100, 'losePanel').setOrigin(0,0);
         this.junglePanelLost.setScale(1.24);
@@ -988,8 +1019,6 @@ class PlayScene extends Phaser.Scene {
             .setInteractive()
             .setOrigin(.5, 0)
             .on('pointerdown', () => this.restart(), this);
-
-          
     }
 
     restart(event) {

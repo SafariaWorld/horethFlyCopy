@@ -85,6 +85,8 @@ class PlayScene extends Phaser.Scene {
         //score
         this.score = 0;
         this.scoreText = null;
+        this.hiScoreText = null;
+        this.errorNameLength = null;
 
         //font
         this.fonts = null;
@@ -1011,38 +1013,8 @@ class PlayScene extends Phaser.Scene {
 
         let hiScoreArray = [];
 
-        let scoreHeightIncrement = -95;
-        let scoreWidthIncrement = 140;
-
-        //get hiscore data and print to screen
-        fetch('http://localhost:8080/leaderboard', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            mode: 'cors'
-        })
-        .then(res => res.json())
-        .then(data => {
-            console.log(data, "data in testFetch");    
-            
-            for (let i = 0; i <= data.length; i++) {
-                this.add.text(width / 7 - 5, height / 2 + scoreHeightIncrement, (i + 1) + "." + data[i].name, 
-                    { fill: '#000000', fontSize: '30px'})
-                    .setInteractive()
-                    .setOrigin(.5, 0);
-        
-                    this.add.text(width / 5 + scoreWidthIncrement, height / 2 + scoreHeightIncrement, data[i].score, 
-                    { fill: '#000000', fontSize: '30px'})
-                    .setInteractive()
-                    .setOrigin(.5, 0);
-
-                    scoreHeightIncrement += 25;
-            }
-            
-
-        })
-        .catch(error => console.error('Error:', error))
+        //POST GET FUNCTIOn HERE
+        this.fetchData();
         
         // console.log(g, "g test 2");
         // console.log('test3')
@@ -1085,28 +1057,88 @@ class PlayScene extends Phaser.Scene {
             .setInteractive()
             .setOrigin(.5, 0);
 
-        submitScoreButton.setInteractive().on('pointerdown', () => this.postHiScore(document.getElementById('input-field').value), this);
-        submitScoreText.setInteractive().on('pointerdown', () => this.postHiScore(document.getElementById('input-field').value), this);
+        submitScoreButton.setInteractive().on('pointerdown', () => this.postHiScore(document.getElementById('input-field').value, submitScoreText), this);
+        submitScoreText.setInteractive().on('pointerdown', () => this.postHiScore(document.getElementById('input-field').value, submitScoreText), this);
     }
 
     buttonClick() {
         console.log('buttonclicked');
     }
 
-    async postHiScore(playerName) {
-        console.log(playerName);
-        await fetch('http://localhost:8080/leaderboard', {
-            method: 'POST',
+    async postHiScore(playerName, button) {
+        const { width, height } = this.sys.game.canvas;
+         
+        if (playerName.length < 14 && playerName.length > 3) {
+                await fetch('http://localhost:8080/leaderboard', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                mode: 'cors',
+                body: JSON.stringify({ score : this.score, name: playerName })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data) {
+                        button.destroy();
+                        this.errorNameLength.destroy();
+                        button = this.add.text(width / 2 - 22, height / 2 + 90 + 15, 'SUCCESS', { fill: '#000000', fontSize: '35px'})
+                        .setInteractive()
+                        .setOrigin(.5, 0)
+                    }
+                })
+                .then(data => console.log(data, "POST RAN - playerName Value =", playerName))
+                .catch(error => console.error('Error:', error))
+        } else if (playerName.length <= 3) {
+            console.log('TOO SHORT');
+            this.errorNameLength = this.add.text(width / 2 - 22, height / 2 + 45 - 110, 'too short', { fill: 'red', fontSize: '35px'})
+                .setInteractive()
+                .setOrigin(.5, 0)
+        }
+        else {
+            console.log('TOO LONG ERROR');
+            this.errorNameLength = this.add.text(width / 2 - 22, height / 2 + 45 - 110, 'too long', { fill: 'red', fontSize: '35px'})
+                .setInteractive()
+                .setOrigin(.5, 0)
+            
+        }
+        
+    }
+
+    fetchData() {
+        const { width, height } = this.sys.game.canvas;
+        let scoreHeightIncrement = -95;
+        let scoreWidthIncrement = 140;
+
+        //get hiscore data and print to screen
+        fetch('http://localhost:8080/leaderboard', {
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             },
-            mode: 'cors',
-            body: JSON.stringify({ score : this.score, name: playerName })
+            mode: 'cors'
         })
         .then(res => res.json())
-        .then(data => console.log(data, "POST RAN - playerName Value =", playerName))
-        .catch(error => console.error('Error:', error))
+        .then(data => {
+            console.log(data, "data in testFetch");    
+            
+            for (let i = 0; i <= data.length; i++) {
+                this.hiScoreText = this.add.text(225, height / 2 + scoreHeightIncrement, (i + 1) + "." + data[i].name, 
+                    { fill: '#000000', fontSize: '30px', align: 'left'})
+                    .setInteractive()
+                    .setOrigin(.5, 0);
         
+                this.hiScoreText = this.add.text(width / 5 + scoreWidthIncrement, height / 2 + scoreHeightIncrement, data[i].score, 
+                    { fill: '#000000', fontSize: '30px'})
+                    .setInteractive()
+                    .setOrigin(.5, 0);
+
+                    scoreHeightIncrement += 25;
+            }
+            
+
+        })
+        .catch(error => console.error('Error:', error))
     }
 
     restart(event) {

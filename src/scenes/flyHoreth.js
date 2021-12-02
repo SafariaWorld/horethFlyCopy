@@ -947,7 +947,7 @@ class PlayScene extends Phaser.Scene {
         let scoreWidthIncrement = 140;
 
         //get hiscore data and print to screen
-        fetch('http://localhost:8080/leaderboard', {
+        fetch('https://horethfly.herokuapp.com/leaderboard', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -1030,7 +1030,7 @@ class PlayScene extends Phaser.Scene {
 
     async postHiScore(playerName) {
         console.log(playerName);
-        await fetch('http://localhost:8080/leaderboard', {
+        await fetch('https://horethfly.herokuapp.com/leaderboard', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

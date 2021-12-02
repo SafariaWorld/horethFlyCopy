@@ -26,6 +26,8 @@ class PlayScene extends Phaser.Scene {
         this.birdsRight = null;
         this.birdsLeft = null;
         this.music = null;
+        this.endMusic = null;
+        this.wind = null;
         this.player = null;
         this.playerVersion2 = null; //check on this to replace with original player
         this.foreground_2 = null;
@@ -83,6 +85,8 @@ class PlayScene extends Phaser.Scene {
         //score
         this.score = 0;
         this.scoreText = null;
+        this.hiScoreText = null;
+        this.errorNameLength = null;
 
         //font
         this.fonts = null;
@@ -101,6 +105,7 @@ class PlayScene extends Phaser.Scene {
         this.snakeBoltAnimation = null;
         this.snakeBoltObject = null;
         this.snakeBoltTracker = 0;
+        this.snakeBoltSound = null;
         
         //enemy Diamond
         this.patrolDiamond = null;
@@ -147,7 +152,20 @@ class PlayScene extends Phaser.Scene {
 
     create() {
         this.music = this.sound.add('theme', {volume: 0.2});
-        //this.music.play();
+        this.music.loop = true;
+        this.music.play();
+
+        this.endMusic = this.sound.add('endTheme');
+        this.endMusic.loop = true;
+        
+
+        this.wind = this.sound.add('wind', {volume: 0.1});
+        this.wind.loop = true;
+        this.wind.play();
+
+        this.snakeBoltSound = this.sound.add('snakeBoltSound', {volume: 0.3});
+        
+        
         this.createBackground();
         this.createPlayer();
         this.createCursorAndKeyUpKeyDown();
@@ -161,8 +179,9 @@ class PlayScene extends Phaser.Scene {
         this.createArmor();
         this.createCollectArmorOverlap();
 
-        this.orbSound = this.sound.add('orbSound', {volume: 0.8});
-        this.goldCollectSound = this.sound.add('goldCollectSound');
+        this.orbSound = this.sound.add('orbSound', {volume: 1.2});
+        this.goldCollectSound = this.sound.add('goldCollectSound', {volume: .4});
+        this.armorCollectSound = this.sound.add('armorCollectSound', {volume: .6});
 
         //UI
         this.topUI = this.add.image(0, 360, 'topUI').setOrigin(0, 0.5);
@@ -182,7 +201,7 @@ class PlayScene extends Phaser.Scene {
 
     update() {
         this.background.tilePositionX += 0.2;
-        this.foreground.tilePositionX += 5.8;
+        this.foreground.tilePositionX += 6.8;
         this.sun.tilePositionX += 0.05;
         this.clouds.tilePositionX += 1;
         this.foreground_2.tilePositionX += .7;
@@ -193,7 +212,15 @@ class PlayScene extends Phaser.Scene {
         
        
         if (this.player.x > this.damageGroup.getChildren(this.fireBallCount).x) {
-            this.endScreen();
+            
+            this.time.addEvent({
+                delay: 500,
+                callback: ()=>{
+                    this.endScreen();
+                    this.endMusic.play();
+                },
+                loop: false
+            })
         }
 
 
@@ -251,6 +278,7 @@ class PlayScene extends Phaser.Scene {
 
         //tracks for snakebolt and if a snake exists to shoot a snakebolt
         if (this.snakeBoltTracker < 1 && this.snakeTracker > 0) {
+            this.snakeBoltSound.play();
             this.snakeBolt = this.createSnakeBolt();
         }
 
@@ -371,11 +399,15 @@ class PlayScene extends Phaser.Scene {
 
         this.player = this.physics.add.sprite(100, 250, 'playerVersion2');
         this.player.setFrame(1);
-        this.player.setScale(.45);
+        this.player.setScale(.60);
         this.player.setCollideWorldBounds(true);
-        this.player.body.setSize(120,45);
+        this.player.body.setSize(180,65);
         this.player.body.x += 20;
+        this.player.body.setOffset(60, 70);
+    }
 
+    playerDeath() {
+        
     }
 
     createBackground() {
@@ -434,7 +466,8 @@ class PlayScene extends Phaser.Scene {
             this.fireball.setScale(.9);
 
             //set collision box
-            this.fireball.body.setSize(80,80);
+            this.fireball.body.setSize(60,60);
+            this.fireball.body.setOffset(25, 50);
             this.fireBallCount += 1;
 
             this.damageItemDistance += 200;
@@ -502,8 +535,17 @@ class PlayScene extends Phaser.Scene {
         this.damageCollider = this.physics.add.collider(this.player, this.damageGroup, () => {
             
                 // console.log('add pause');
+                this.player.setGravityY(300);
+
                 this.physics.pause();
-                this.endScreen();
+                this.time.addEvent({
+                    delay: 500,
+                    callback: ()=>{
+                        this.endScreen();
+                        this.endMusic.play();
+                    },
+                    loop: false
+                })
                     
         });
         
@@ -566,10 +608,18 @@ class PlayScene extends Phaser.Scene {
 
     createElectricCollider() {
         this.damageCollider2 = this.physics.add.collider(this.player, this.electricGroup, () => {
-            
+            this.player.setGravityY(300);
             //console.log('add pause');
             this.physics.pause();
-            this.endScreen();
+            this.time.addEvent({
+                delay: 500,
+                callback: ()=>{
+                    
+                    this.endScreen();
+                    this.endMusic.play();
+                },
+                loop: false
+            })
                 
         });
     
@@ -586,7 +636,7 @@ class PlayScene extends Phaser.Scene {
 
         this.collectItemDistance = 800;
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 11; i++) {
 
             this.newCoins = {
                 key: 'coinAnimation',
@@ -608,7 +658,7 @@ class PlayScene extends Phaser.Scene {
             // this.coins.setScale(.3);
 
             // //set collision box
-            this.coins.body.setSize(375,375);
+            this.coins.body.setSize(75,75);
         }
 
         this.collectGroup.setVelocityX(-350);
@@ -620,6 +670,7 @@ class PlayScene extends Phaser.Scene {
 
     collectCoin(player, collectGroup) {
         collectGroup.disableBody(true, true);
+        collectGroup.destroy();
         this.score += 1;
         this.scoreText.setText(this.score);
 
@@ -641,11 +692,11 @@ class PlayScene extends Phaser.Scene {
             this.collectArmorHeight = Math.random() * (600 - 50) + 50;
             this.armor = this.collectArmorGroup.create(this.collectArmorDistance, this.collectArmorHeight, 'armor');
             this.collectArmorDistance += 15000;
-            this.armor.setScale(.5);
+            this.armor.setScale(.3);
             
 
             //set collision box
-            this.armor.body.setSize(100,100);
+            this.armor.body.setSize(200,200);
         }
         this.collectArmorGroup.setVelocityX(-350);
     }
@@ -658,7 +709,7 @@ class PlayScene extends Phaser.Scene {
         collectArmorGroup.disableBody(true,true);
         this.armorCollected = true;
         //console.log(this.armorCollected, "- armor collected status");
-        this.goldCollectSound.play();
+        this.armorCollectSound.play();
         this.damageCollider.active = false;
         this.healthCollider.active = true;
         this.damageCollider2.active = false;
@@ -672,8 +723,10 @@ class PlayScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keyUP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         this.keyDOWN = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+        this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     } 
 
+    
 
     //---------------------------create only 1 horeth ball---------------------------//
     createHorethBall() {
@@ -683,7 +736,8 @@ class PlayScene extends Phaser.Scene {
 
             //console.log(this.currentHorethBallNumber, this.maxHorethBall);
             if (this.currentHorethBallNumber < this.maxHorethBall) {
-            this.horethBall = this.playerDamageGroup.create(this.player.x, this.player.y, 'horethBall');
+            this.player.setFrame(2);
+            this.horethBall = this.playerDamageGroup.create(this.player.x + 20, this.player.y, 'horethBall');
             this.horethBall.setScale(.3);
             this.playerDamageGroup.setVelocityX(900); 
             this.currentHorethBallNumber += 1;
@@ -735,8 +789,8 @@ class PlayScene extends Phaser.Scene {
             
             this.snake = {
                 key: 'snakeVersion2',
-                frames: this.anims.generateFrameNumbers('snake', {start: 0, end: 5, first: 0}),
-                frameRate: 3,
+                frames: this.anims.generateFrameNumbers('snake', {start: 0, end: 3, first: 0}),
+                frameRate: 2,
                 repeat: -1
             }
             
@@ -805,6 +859,9 @@ class PlayScene extends Phaser.Scene {
         this.snakeBoltObject.setScale(.5);
         this.snakeBoltObject.setSize(140,30);
         this.snakeBoltObject.setVelocityX(-400);
+        
+        
+        
         
     }
 
@@ -889,6 +946,15 @@ class PlayScene extends Phaser.Scene {
                 this.player.setFrame(6);
             }
         }
+        else if (this.spaceBar.isDown) {
+            if (this.armorCollected == false) {
+                this.player.setFrame(9);
+            }
+            if (this.armorCollected == true) {
+                this.player.setFrame(8);
+            }
+
+        }
         else {
             this.player.setVelocityY(0);
             this.player.setDrag(1000);
@@ -916,6 +982,8 @@ class PlayScene extends Phaser.Scene {
         }
     }
 
+   
+
     resetVariables() {
         this.snakeTracker = 0;
         this.move1 = false;
@@ -925,6 +993,8 @@ class PlayScene extends Phaser.Scene {
     async endScreen() {
         //so horethball doesn't spawn when typing name
         this.horethBallReady = false;
+        
+        this.music.stop();        
 
         //API call to save score, create config in future
         console.log('fetch in endscreen line 969');
@@ -943,38 +1013,8 @@ class PlayScene extends Phaser.Scene {
 
         let hiScoreArray = [];
 
-        let scoreHeightIncrement = -95;
-        let scoreWidthIncrement = 140;
-
-        //get hiscore data and print to screen
-        fetch('https://horethfly.herokuapp.com/leaderboard', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            mode: 'cors'
-        })
-        .then(res => res.json())
-        .then(data => {
-            console.log(data, "data in testFetch");    
-            
-            for (let i = 0; i <= data.length; i++) {
-                this.add.text(width / 7 - 5, height / 2 + scoreHeightIncrement, (i + 1) + "." + data[i].name, 
-                    { fill: '#000000', fontSize: '30px'})
-                    .setInteractive()
-                    .setOrigin(.5, 0);
         
-                    this.add.text(width / 5 + scoreWidthIncrement, height / 2 + scoreHeightIncrement, data[i].score, 
-                    { fill: '#000000', fontSize: '30px'})
-                    .setInteractive()
-                    .setOrigin(.5, 0);
-
-                    scoreHeightIncrement += 25;
-            }
-            
-
-        })
-        .catch(error => console.error('Error:', error))
+        this.fetchData();
         
         // console.log(g, "g test 2");
         // console.log('test3')
@@ -1017,31 +1057,99 @@ class PlayScene extends Phaser.Scene {
             .setInteractive()
             .setOrigin(.5, 0);
 
-        
-       
-
-        submitScoreButton.setInteractive().on('pointerdown', () => this.postHiScore(document.getElementById('input-field').value), this);
-        submitScoreText.setInteractive().on('pointerdown', () => this.postHiScore(document.getElementById('input-field').value), this);
+        submitScoreButton.setInteractive().on('pointerdown', () => this.postHiScore(document.getElementById('input-field').value, submitScoreText), this);
+        submitScoreText.setInteractive().on('pointerdown', () => this.postHiScore(document.getElementById('input-field').value, submitScoreText), this);
     }
 
     buttonClick() {
         console.log('buttonclicked');
     }
 
-    async postHiScore(playerName) {
-        console.log(playerName);
-        await fetch('https://horethfly.herokuapp.com/leaderboard', {
-            method: 'POST',
+    async postHiScore(playerName, button) {
+        const { width, height } = this.sys.game.canvas;
+         
+        if (playerName.length < 14 && playerName.length > 3) {
+                await fetch('http://localhost:8080/leaderboard', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                mode: 'cors',
+                body: JSON.stringify({ score : this.score, name: playerName })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data) {
+                        button.destroy();
+                        if (this.errorNameLength) {
+                            this.errorNameLength.destroy();
+                        }
+                        this.errorNameLength = this.add.text(width / 2 - 22, height / 2 + 45 - 110, 'SUCCESS', { fill: 'green', fontSize: '35px'})
+                    .setInteractive()
+                    .setOrigin(.5, 0)
+                        
+                        button = this.add.text(width / 2 - 22, height / 2 + 90 + 15, 'SUCCESS', { fill: '#000000', fontSize: '35px'})
+                        .setInteractive()
+                        .setOrigin(.5, 0)
+                    }
+                })
+                .then(data => console.log(data, "POST RAN - playerName Value =", playerName))
+                .catch(error => console.error('Error:', error))
+        } else if (playerName.length <= 3) {
+            console.log('TOO SHORT');
+            
+            
+            this.errorNameLength = this.add.text(width / 2 - 22, height / 2 + 45 - 110, 'too short', { fill: 'red', fontSize: '35px'})
+                .setInteractive()
+                .setOrigin(.5, 0)
+        }
+        else {
+            if (this.errorNameLength) {
+                this.errorNameLength.destroy();
+            }
+            this.errorNameLength.destroy();
+            this.errorNameLength = this.add.text(width / 2 - 22, height / 2 + 45 - 110, 'too long', { fill: 'red', fontSize: '35px'})
+                .setInteractive()
+                .setOrigin(.5, 0)
+            
+        }
+        
+    }
+
+    fetchData() {
+        const { width, height } = this.sys.game.canvas;
+        let scoreHeightIncrement = -95;
+        let scoreWidthIncrement = 140;
+
+        //get hiscore data and print to screen
+        fetch('http://localhost:8080/leaderboard', {
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             },
-            mode: 'cors',
-            body: JSON.stringify({ score : this.score, name: playerName })
+            mode: 'cors'
         })
         .then(res => res.json())
-        .then(data => console.log(data, "POST RAN - playerName Value =", playerName))
-        .catch(error => console.error('Error:', error))
+        .then(data => {
+            console.log(data, "data in testFetch");    
+            
+            for (let i = 0; i <= data.length; i++) {
+                this.hiScoreText = this.add.text(225, height / 2 + scoreHeightIncrement, (i + 1) + "." + data[i].name, 
+                    { fill: '#000000', fontSize: '30px', align: 'left'})
+                    .setInteractive()
+                    .setOrigin(.5, 0);
         
+                this.hiScoreText = this.add.text(width / 5 + scoreWidthIncrement, height / 2 + scoreHeightIncrement, data[i].score, 
+                    { fill: '#000000', fontSize: '30px'})
+                    .setInteractive()
+                    .setOrigin(.5, 0);
+
+                    scoreHeightIncrement += 25;
+            }
+            
+
+        })
+        .catch(error => console.error('Error:', error))
     }
 
     restart(event) {
@@ -1055,6 +1163,8 @@ class PlayScene extends Phaser.Scene {
         this.move3 = false;
         this.move4 = false;
         this.music.stop();
+        this.endMusic.stop();
+        this.wind.stop();
         
 
         if (this.snakeTracker > 0) {

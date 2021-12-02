@@ -6,7 +6,13 @@ import WebFontFile from '../WebFontFile';
 class PlayScene extends Phaser.Scene {
 
     constructor() {
-        super('PlayScene');
+        super({
+        
+            key: 'PlayScene',
+            // dom: {
+            //     createContainer: true
+            // }
+        });
 
         //test API
         let g = null;
@@ -70,6 +76,9 @@ class PlayScene extends Phaser.Scene {
         this.maxHorethBall = 1;
         this.currentHorethBallNumber = 0;
         this.bluntImpactSound = null;
+        
+        //active/deactivate Horethball
+        this.horethBallReady = true;
 
         //score
         this.score = 0;
@@ -167,7 +176,7 @@ class PlayScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-SPACE', this.createHorethBall, this);
 
         // this.createHorethBallCollider();       
-        this.createPatrolDiamond();
+     //   this.createPatrolDiamond();
         // let g = this.testFetch();
     }
 
@@ -406,7 +415,7 @@ class PlayScene extends Phaser.Scene {
 
         this.damageItemDistance = 1000;
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 11; i++) {
 
             this.damageItemDistance += 400;
             this.damageItemHeight = Math.random() * (600 - 50) + 50;
@@ -668,20 +677,24 @@ class PlayScene extends Phaser.Scene {
 
     //---------------------------create only 1 horeth ball---------------------------//
     createHorethBall() {
-        this.playerDamageGroup = this.physics.add.group();
 
-        //console.log(this.currentHorethBallNumber, this.maxHorethBall);
-        if (this.currentHorethBallNumber < this.maxHorethBall) {
+        if (this.horethBallReady == true) {
+            this.playerDamageGroup = this.physics.add.group();
+
+            //console.log(this.currentHorethBallNumber, this.maxHorethBall);
+            if (this.currentHorethBallNumber < this.maxHorethBall) {
             this.horethBall = this.playerDamageGroup.create(this.player.x, this.player.y, 'horethBall');
             this.horethBall.setScale(.3);
             this.playerDamageGroup.setVelocityX(900); 
             this.currentHorethBallNumber += 1;
             this.orbSound.play();
         
-        if (this.snake) {
+            if (this.snake) {
             console.log(this.playerDamageGroup, 'and', this.enemyGroup, "line");
             this.physics.add.overlap(this.playerDamageGroup, this.enemyGroup, this.destroySnake, null, this);
+            }
         }
+        
     } 
 
         
@@ -909,84 +922,18 @@ class PlayScene extends Phaser.Scene {
         this.move2 = false;
     }
 
-    // async testFetch() {
-
-    //     let hiScoreArray = [];
-    //     //method 1
-    //     console.log('test fetch line 916');
-    //     fetch('http://localhost:8080/leaderboard', {
-    //         method: 'GET',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         mode: 'cors'
-    //     })
-    //     .then(res => res.json())
-    //     .then(data => {
-    //         console.log(data, "data in testFetch");
-    //         console.log(this.displayHiScore(data), "more data in testFetch");
-    //         return  this.displayHiScore(data);
-    //     })
-    //     .catch(error => console.error('Error:', error))
-
-    
-        
-
-        
-    //     //method 2
-    //     // let response = await fetch('http://localhost:8080/leaderboard');
-    //     // let scores = await response.json();
-        
-
-    //     // return await scores;
-
-    //     //method 3
-    //     // let scores = await fetch('http://localhost:8080/leaderboard').then(response => {
-    //     //     console.log(response);
-    //     //     //print scores
-    //     //     let returnVariable = this.printData(response.json());
-    //     //     return returnVariable;
-    //     // })
-
-    // }
-
-    // displayHiScore(data) {
-
-    //     console.log(data, "from displayHiScore Function line 951");
-    //     let scoreArray = [];
-
-    //     for (let i = 0; i < data.length; i++) {
-    //         // console.log(data[i].name, "- name");
-    //         // console.log(data[i].score, "- score");
-    //         scoreArray[i] = new Array(data[i].name, data[i].score);
-    //     }
-    //     console.log('error');
-    //     console.log(scoreArray, 'scoreArray line 960');
-
-    //     return scoreArray;
-    // }
-
-
     async endScreen() {
+        //so horethball doesn't spawn when typing name
+        this.horethBallReady = false;
 
         //API call to save score, create config in future
         console.log('fetch in endscreen line 969');
-        await fetch('http://localhost:8080/leaderboard', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            mode: 'cors',
-            body: JSON.stringify({ score : this.score, name: "test" })
-        })
-        .then(res => res.json())
-        .then(data => console.log(data, "this is data from POST"))
-        .catch(error => console.error('Error:', error))
+        
 
         this.resetVariables();
-        
-        
+            
         const { width, height } = this.sys.game.canvas;
+        
 
 
         //*************HISCORE PANEL***************
@@ -996,7 +943,7 @@ class PlayScene extends Phaser.Scene {
 
         let hiScoreArray = [];
 
-        let scoreIncrement = -95
+        let scoreHeightIncrement = -95;
         let scoreWidthIncrement = 140;
 
         //get hiscore data and print to screen
@@ -1012,26 +959,23 @@ class PlayScene extends Phaser.Scene {
             console.log(data, "data in testFetch");    
             
             for (let i = 0; i <= data.length; i++) {
-                this.add.text(width / 7 - 20, height / 2 + scoreIncrement, (i + 1) + "." + data[i].name, 
+                this.add.text(width / 7 - 5, height / 2 + scoreHeightIncrement, (i + 1) + "." + data[i].name, 
                     { fill: '#000000', fontSize: '30px'})
                     .setInteractive()
                     .setOrigin(.5, 0);
         
-                    this.add.text(width / 5 + scoreWidthIncrement, height / 2 + scoreIncrement, data[i].score, 
+                    this.add.text(width / 5 + scoreWidthIncrement, height / 2 + scoreHeightIncrement, data[i].score, 
                     { fill: '#000000', fontSize: '30px'})
                     .setInteractive()
                     .setOrigin(.5, 0);
 
-                    scoreIncrement += 25;
+                    scoreHeightIncrement += 25;
             }
             
 
         })
         .catch(error => console.error('Error:', error))
         
-
-
-
         // console.log(g, "g test 2");
         // console.log('test3')
 
@@ -1042,7 +986,6 @@ class PlayScene extends Phaser.Scene {
         this.junglePanelLost = this.add.sprite(width/2 + 195 + widthIncrement, 100 + heightIncrement, 'losePanel').setOrigin(0,0);
         this.junglePanelLost.setScale(1.1);
     
-
         this.add.text(width / 2 + 390 + widthIncrement, height / 2 - 140 + heightIncrement, 'Your Score: ', 
         { fill: '#000000', fontSize: '40px'})
             .setInteractive()
@@ -1055,17 +998,55 @@ class PlayScene extends Phaser.Scene {
 
         this.button = this.add.sprite(width/2 + 257 + widthIncrement,height/2 + 55 + heightIncrement, "button").setOrigin(0,0); 
         this.button.setScale(.8);  
-        this.button.setInteractive().on('pointerdown', () => this.restart(), this)
-        
+        this.button.setInteractive().on('pointerdown', () => this.restart(), this);
 
         this.add.text(width / 2 + 370 + widthIncrement, height / 2 + 80 + heightIncrement, 'PLAY AGAIN', 
         { fill: '#000000', fontSize: '30px'})
             .setInteractive()
             .setOrigin(.5, 0)
             .on('pointerdown', () => this.restart(), this);
+
+
+
+        //inputbox to submit score 
+        let playerName = this.add.dom(618, 405).createFromCache("form")
+        let submitScoreButton = this.add.sprite(width/2 - 110, height/2 + 75 + heightIncrement, "button").setOrigin(0,0);
+        submitScoreButton.setScale(0.61); 
+        let submitScoreText = this.add.text(width / 2 - 22, height / 2 + 90 + heightIncrement, 'Submit', 
+        { fill: '#000000', fontSize: '35px'})
+            .setInteractive()
+            .setOrigin(.5, 0);
+
+        
+       
+
+        submitScoreButton.setInteractive().on('pointerdown', () => this.postHiScore(document.getElementById('input-field').value), this);
+        submitScoreText.setInteractive().on('pointerdown', () => this.postHiScore(document.getElementById('input-field').value), this);
+    }
+
+    buttonClick() {
+        console.log('buttonclicked');
+    }
+
+    async postHiScore(playerName) {
+        console.log(playerName);
+        await fetch('http://localhost:8080/leaderboard', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            mode: 'cors',
+            body: JSON.stringify({ score : this.score, name: playerName })
+        })
+        .then(res => res.json())
+        .then(data => console.log(data, "POST RAN - playerName Value =", playerName))
+        .catch(error => console.error('Error:', error))
+C
+        
     }
 
     restart(event) {
+        this.horethBallReady = true;
         this.score = 0;
         this.snake = null;
         this.snakeBoltTracker = 0;

@@ -11,6 +11,10 @@ const config = {
     type: Phaser.AUTO,
     width: 1280,
     height: 720,
+    dom: {
+        createContainer: true
+    },
+    parent: 'input-form',
     physics: {
         default: 'arcade',
         arcade: {

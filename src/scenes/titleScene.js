@@ -1,11 +1,16 @@
+import Phaser from "phaser";
+
 class TitleScene extends Phaser.Scene {
 
 	constructor() {
-		super({key:'titleScene'});
+		super({key:'titleScene',});
 
         this.sun = null;
         this.foregroundTitle = null;
         this.cloudsTitle = null;
+        this.domElement = null;
+
+        
 	}
 
 	preload() {
@@ -13,6 +18,7 @@ class TitleScene extends Phaser.Scene {
         this.load.image('startButtonMenu', 'assets/startButtonMenu.png');
         this.load.image('sun', 'assets/sun.png');
         this.load.image('foregroundTitle', 'assets/foreground_3.png');
+        this.load.html('form', 'assets/form.html');
 
 	}
 
@@ -20,6 +26,8 @@ class TitleScene extends Phaser.Scene {
         const { width, height } = this.sys.game.canvas;
         const bg = this.add.sprite(0,0,'background');
         bg.setOrigin(0,0);
+
+        console.log('nameInputDOWN');
 
         this.sun = this.add.tileSprite(650, 450, 1250, 500, 'sun');
         this.sun.setScale(2)
@@ -40,8 +48,9 @@ class TitleScene extends Phaser.Scene {
         junglePanelButton.setInteractive({ useHandCursor: true }).on('pointerdown', () => this.loadGame(), this);
 
         
-
+      
         
+        // newContainer.add(element1);
         const text = this.add.text(width / 2 * 1.65, height / 2 + 60, 'START',
          { fill: '#000000', fontSize: '25px'})
             .setInteractive({ useHandCursor: true })
@@ -61,6 +70,7 @@ class TitleScene extends Phaser.Scene {
         this.foregroundTitle.tilePositionX += 3;
         this.cloudsTitle.tilePositionX += 1
     }
+
 
 }
 

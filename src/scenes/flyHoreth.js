@@ -103,6 +103,7 @@ class PlayScene extends Phaser.Scene {
         this.snakeBoltAnimation = null;
         this.snakeBoltObject = null;
         this.snakeBoltTracker = 0;
+        this.snakeBoltSound = null;
         
         //enemy Diamond
         this.patrolDiamond = null;
@@ -159,6 +160,8 @@ class PlayScene extends Phaser.Scene {
         this.wind = this.sound.add('wind', {volume: 0.1});
         this.wind.loop = true;
         this.wind.play();
+
+        this.snakeBoltSound = this.sound.add('snakeBoltSound', {volume: 0.3});
         
         
         this.createBackground();
@@ -273,6 +276,7 @@ class PlayScene extends Phaser.Scene {
 
         //tracks for snakebolt and if a snake exists to shoot a snakebolt
         if (this.snakeBoltTracker < 1 && this.snakeTracker > 0) {
+            this.snakeBoltSound.play();
             this.snakeBolt = this.createSnakeBolt();
         }
 
@@ -393,11 +397,15 @@ class PlayScene extends Phaser.Scene {
 
         this.player = this.physics.add.sprite(100, 250, 'playerVersion2');
         this.player.setFrame(1);
-        this.player.setScale(.45);
+        this.player.setScale(.60);
         this.player.setCollideWorldBounds(true);
-        this.player.body.setSize(120,45);
+        this.player.body.setSize(180,65);
         this.player.body.x += 20;
+        this.player.body.setOffset(60, 70);
+    }
 
+    playerDeath() {
+        
     }
 
     createBackground() {
@@ -456,7 +464,8 @@ class PlayScene extends Phaser.Scene {
             this.fireball.setScale(.9);
 
             //set collision box
-            this.fireball.body.setSize(80,80);
+            this.fireball.body.setSize(60,60);
+            this.fireball.body.setOffset(25, 50);
             this.fireBallCount += 1;
 
             this.damageItemDistance += 200;
@@ -647,7 +656,7 @@ class PlayScene extends Phaser.Scene {
             // this.coins.setScale(.3);
 
             // //set collision box
-            this.coins.body.setSize(375,375);
+            this.coins.body.setSize(75,75);
         }
 
         this.collectGroup.setVelocityX(-350);
@@ -680,11 +689,11 @@ class PlayScene extends Phaser.Scene {
             this.collectArmorHeight = Math.random() * (600 - 50) + 50;
             this.armor = this.collectArmorGroup.create(this.collectArmorDistance, this.collectArmorHeight, 'armor');
             this.collectArmorDistance += 15000;
-            this.armor.setScale(.5);
+            this.armor.setScale(.3);
             
 
             //set collision box
-            this.armor.body.setSize(100,100);
+            this.armor.body.setSize(200,200);
         }
         this.collectArmorGroup.setVelocityX(-350);
     }
@@ -711,8 +720,10 @@ class PlayScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keyUP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         this.keyDOWN = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+        this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     } 
 
+    
 
     //---------------------------create only 1 horeth ball---------------------------//
     createHorethBall() {
@@ -722,7 +733,8 @@ class PlayScene extends Phaser.Scene {
 
             //console.log(this.currentHorethBallNumber, this.maxHorethBall);
             if (this.currentHorethBallNumber < this.maxHorethBall) {
-            this.horethBall = this.playerDamageGroup.create(this.player.x, this.player.y, 'horethBall');
+            this.player.setFrame(2);
+            this.horethBall = this.playerDamageGroup.create(this.player.x + 20, this.player.y, 'horethBall');
             this.horethBall.setScale(.3);
             this.playerDamageGroup.setVelocityX(900); 
             this.currentHorethBallNumber += 1;
@@ -774,8 +786,8 @@ class PlayScene extends Phaser.Scene {
             
             this.snake = {
                 key: 'snakeVersion2',
-                frames: this.anims.generateFrameNumbers('snake', {start: 0, end: 5, first: 0}),
-                frameRate: 3,
+                frames: this.anims.generateFrameNumbers('snake', {start: 0, end: 3, first: 0}),
+                frameRate: 2,
                 repeat: -1
             }
             
@@ -844,6 +856,9 @@ class PlayScene extends Phaser.Scene {
         this.snakeBoltObject.setScale(.5);
         this.snakeBoltObject.setSize(140,30);
         this.snakeBoltObject.setVelocityX(-400);
+        
+        
+        
         
     }
 
@@ -928,6 +943,15 @@ class PlayScene extends Phaser.Scene {
                 this.player.setFrame(6);
             }
         }
+        else if (this.spaceBar.isDown) {
+            if (this.armorCollected == false) {
+                this.player.setFrame(9);
+            }
+            if (this.armorCollected == true) {
+                this.player.setFrame(8);
+            }
+
+        }
         else {
             this.player.setVelocityY(0);
             this.player.setDrag(1000);
@@ -954,6 +978,8 @@ class PlayScene extends Phaser.Scene {
             this.player.setVelocityX(425);
         }
     }
+
+   
 
     resetVariables() {
         this.snakeTracker = 0;
@@ -1094,6 +1120,7 @@ class PlayScene extends Phaser.Scene {
         this.move4 = false;
         this.music.stop();
         this.endMusic.stop();
+        this.wind.stop();
         
 
         if (this.snakeTracker > 0) {

@@ -32,6 +32,8 @@ class PreloadScene extends Phaser.Scene {
     this.load.audio('theme', 'assets/audio/mainMusic.wav');
     this.load.audio('endTheme', 'assets/audio/endMusic.wav');
     this.load.audio('wind', 'assets/audio/wind.wav');
+    this.load.audio('snakeBoltSound', 'assets/audio/enemySnakeBoltSound.mp3');
+    this.load.audio('startMusic', 'assets/audio/startMusic.wav');
 
         this.load.image('topUI', 'assets/topUI.png');
 
@@ -56,7 +58,7 @@ class PreloadScene extends Phaser.Scene {
         this.load.image('birdsRight','assets/birdsRight.png');
         this.load.image('sun', 'assets/sun.png');
         this.load.image('player', 'assets/horus.png');
-        this.load.spritesheet('playerVersion2', 'assets/horusFullSpriteSheet.png', { frameWidth: 370, frameHeight: 300 });
+        this.load.spritesheet('playerVersion2', 'assets/horusFullSpriteSheet.png', { frameWidth: 277.5, frameHeight: 225 });
         this.load.spritesheet('playerArmorOne', 'assets/horethArmorOneSpriteSheet.png', { frameWidth: 222, frameHeight: 300 });
         
 
@@ -76,7 +78,7 @@ class PreloadScene extends Phaser.Scene {
 
         //this.load.image('snake','assets/snake.png');
     
-        this.load.spritesheet('snake', 'assets/snakeSpriteSheet.png', { frameWidth: 330, frameHeight: 165 });
+        this.load.spritesheet('snake', 'assets/snakeSpriteSheet.png', { frameWidth: 330, frameHeight: 84 });
         this.load.image('patrolDiamond', 'assets/patrolDiamond.png');
 
         this.load.spritesheet("newFireBall", "assets/fireBallSpriteSheet.png", { frameWidth: 225, frameHeight: 150 });

@@ -668,6 +668,7 @@ class PlayScene extends Phaser.Scene {
 
     collectCoin(player, collectGroup) {
         collectGroup.disableBody(true, true);
+        collectGroup.destroy();
         this.score += 1;
         this.scoreText.setText(this.score);
 

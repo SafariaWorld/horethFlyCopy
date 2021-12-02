@@ -1041,7 +1041,6 @@ class PlayScene extends Phaser.Scene {
         .then(res => res.json())
         .then(data => console.log(data, "POST RAN - playerName Value =", playerName))
         .catch(error => console.error('Error:', error))
-C
         
     }
 

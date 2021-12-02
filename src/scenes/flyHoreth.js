@@ -26,6 +26,8 @@ class PlayScene extends Phaser.Scene {
         this.birdsRight = null;
         this.birdsLeft = null;
         this.music = null;
+        this.endMusic = null;
+        this.wind = null;
         this.player = null;
         this.playerVersion2 = null; //check on this to replace with original player
         this.foreground_2 = null;
@@ -147,7 +149,18 @@ class PlayScene extends Phaser.Scene {
 
     create() {
         this.music = this.sound.add('theme', {volume: 0.2});
-        //this.music.play();
+        this.music.loop = true;
+        this.music.play();
+
+        this.endMusic = this.sound.add('endTheme');
+        this.endMusic.loop = true;
+        
+
+        this.wind = this.sound.add('wind', {volume: 0.1});
+        this.wind.loop = true;
+        this.wind.play();
+        
+        
         this.createBackground();
         this.createPlayer();
         this.createCursorAndKeyUpKeyDown();
@@ -161,8 +174,9 @@ class PlayScene extends Phaser.Scene {
         this.createArmor();
         this.createCollectArmorOverlap();
 
-        this.orbSound = this.sound.add('orbSound', {volume: 0.8});
-        this.goldCollectSound = this.sound.add('goldCollectSound');
+        this.orbSound = this.sound.add('orbSound', {volume: 1.2});
+        this.goldCollectSound = this.sound.add('goldCollectSound', {volume: .4});
+        this.armorCollectSound = this.sound.add('armorCollectSound', {volume: .6});
 
         //UI
         this.topUI = this.add.image(0, 360, 'topUI').setOrigin(0, 0.5);
@@ -182,7 +196,7 @@ class PlayScene extends Phaser.Scene {
 
     update() {
         this.background.tilePositionX += 0.2;
-        this.foreground.tilePositionX += 5.8;
+        this.foreground.tilePositionX += 6.8;
         this.sun.tilePositionX += 0.05;
         this.clouds.tilePositionX += 1;
         this.foreground_2.tilePositionX += .7;
@@ -193,7 +207,15 @@ class PlayScene extends Phaser.Scene {
         
        
         if (this.player.x > this.damageGroup.getChildren(this.fireBallCount).x) {
-            this.endScreen();
+            
+            this.time.addEvent({
+                delay: 500,
+                callback: ()=>{
+                    this.endScreen();
+                    this.endMusic.play();
+                },
+                loop: false
+            })
         }
 
 
@@ -502,8 +524,17 @@ class PlayScene extends Phaser.Scene {
         this.damageCollider = this.physics.add.collider(this.player, this.damageGroup, () => {
             
                 // console.log('add pause');
+                this.player.setGravityY(300);
+
                 this.physics.pause();
-                this.endScreen();
+                this.time.addEvent({
+                    delay: 500,
+                    callback: ()=>{
+                        this.endScreen();
+                        this.endMusic.play();
+                    },
+                    loop: false
+                })
                     
         });
         
@@ -566,10 +597,18 @@ class PlayScene extends Phaser.Scene {
 
     createElectricCollider() {
         this.damageCollider2 = this.physics.add.collider(this.player, this.electricGroup, () => {
-            
+            this.player.setGravityY(300);
             //console.log('add pause');
             this.physics.pause();
-            this.endScreen();
+            this.time.addEvent({
+                delay: 500,
+                callback: ()=>{
+                    
+                    this.endScreen();
+                    this.endMusic.play();
+                },
+                loop: false
+            })
                 
         });
     
@@ -586,7 +625,7 @@ class PlayScene extends Phaser.Scene {
 
         this.collectItemDistance = 800;
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 11; i++) {
 
             this.newCoins = {
                 key: 'coinAnimation',
@@ -658,7 +697,7 @@ class PlayScene extends Phaser.Scene {
         collectArmorGroup.disableBody(true,true);
         this.armorCollected = true;
         //console.log(this.armorCollected, "- armor collected status");
-        this.goldCollectSound.play();
+        this.armorCollectSound.play();
         this.damageCollider.active = false;
         this.healthCollider.active = true;
         this.damageCollider2.active = false;
@@ -925,6 +964,8 @@ class PlayScene extends Phaser.Scene {
     async endScreen() {
         //so horethball doesn't spawn when typing name
         this.horethBallReady = false;
+        
+        this.music.stop();        
 
         //API call to save score, create config in future
         console.log('fetch in endscreen line 969');
@@ -1017,9 +1058,6 @@ class PlayScene extends Phaser.Scene {
             .setInteractive()
             .setOrigin(.5, 0);
 
-        
-       
-
         submitScoreButton.setInteractive().on('pointerdown', () => this.postHiScore(document.getElementById('input-field').value), this);
         submitScoreText.setInteractive().on('pointerdown', () => this.postHiScore(document.getElementById('input-field').value), this);
     }
@@ -1055,6 +1093,7 @@ class PlayScene extends Phaser.Scene {
         this.move3 = false;
         this.move4 = false;
         this.music.stop();
+        this.endMusic.stop();
         
 
         if (this.snakeTracker > 0) {

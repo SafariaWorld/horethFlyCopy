@@ -30,6 +30,8 @@ class PreloadScene extends Phaser.Scene {
 
     //ALL LOADS BETWEEN COMMENTS
     this.load.audio('theme', 'assets/audio/mainMusic.wav');
+    this.load.audio('endTheme', 'assets/audio/endMusic.wav');
+    this.load.audio('wind', 'assets/audio/wind.wav');
 
         this.load.image('topUI', 'assets/topUI.png');
 
@@ -84,7 +86,8 @@ class PreloadScene extends Phaser.Scene {
 
 
         this.load.audio('orbSound', 'assets/audio/spell.mp3');
-        this.load.audio('goldCollectSound', 'assets/audio/coinNew.wav');
+        this.load.audio('goldCollectSound', 'assets/audio/coinNew.mp3');
+        this.load.audio('armorCollectSound', 'assets/audio/armorNew.wav');
 
         
 

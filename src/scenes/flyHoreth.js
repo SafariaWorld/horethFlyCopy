@@ -1146,6 +1146,9 @@ class PlayScene extends Phaser.Scene {
                 .then(data => console.log(data, "POST RAN - playerName Value =", playerName))
                 .catch(error => console.error('Error:', error))
         } else if (playerName.length <= 3) {
+            if (this.errorNameLength) {
+                this.errorNameLength.destroy();
+            }
             console.log('TOO SHORT');
             
             this.errorNameLength = this.add.text(width / 2 - 22, height / 2 + 45 - 110, 'too short', { fill: 'red', fontSize: '35px'})

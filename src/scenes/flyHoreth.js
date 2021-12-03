@@ -17,6 +17,8 @@ class PlayScene extends Phaser.Scene {
         //test API
         let g = null;
     
+        
+        
         this.background = null;
         this.backgroundBuildings = null;
         this.foreground = null;
@@ -33,6 +35,8 @@ class PlayScene extends Phaser.Scene {
         this.foreground_2 = null;
         this.foreground_3 = null;
         this.fireBallCount = 0;
+
+
 
         //controls
         this.cursors = null;
@@ -141,6 +145,13 @@ class PlayScene extends Phaser.Scene {
 
         this.junglePanelLost = null;
 
+        //timer
+
+        this.timeElapsed = null;
+        this.timerVariable = null;
+        this.printTime = null;
+        this.stopTimerEnd = false;
+
     }
 
     
@@ -151,10 +162,13 @@ class PlayScene extends Phaser.Scene {
     }
 
     create() {
+
+        const { width, height } = this.sys.game.canvas;
         this.music = this.sound.add('theme', {volume: 0.2});
         this.music.loop = true;
         this.music.play();
 
+        
         this.endMusic = this.sound.add('endTheme');
         this.endMusic.loop = true;
         
@@ -194,6 +208,8 @@ class PlayScene extends Phaser.Scene {
         this.bluntImpactSound = this.sound.add('bluntImpactSound');
         this.input.keyboard.on('keydown-SPACE', this.createHorethBall, this);
 
+      
+      this.gameTimer();  
         // this.createHorethBallCollider();       
      //   this.createPatrolDiamond();
         // let g = this.testFetch();
@@ -281,11 +297,49 @@ class PlayScene extends Phaser.Scene {
             this.snakeBoltSound.play();
             this.snakeBolt = this.createSnakeBolt();
         }
-
-
-  
+        
+        if (this.stopTimerEnd == false) {
+            this.getElapsedTime();
+        }
         
     }
+
+    //****************TIMER*******************//
+
+    gameTimer() {
+       this.timerVariable = this.time.addEvent({delay: 90000, callback: this.endGameUsingTimer, callbackScope: this, loop: false})   
+    }
+
+    getElapsedTime() {
+
+            if (this.printTime) {
+                this.printTime.destroy();
+            }
+        
+        var elapsed = this.timerVariable.getElapsedSeconds()
+        console.log(elapsed);
+
+        let timePrint = null;
+
+        if (elapsed < 10) {
+            timePrint = elapsed.toString().substr(0, 1)
+        } else {
+            timePrint = elapsed.toString().substr(0, 2)
+        }
+
+        let totalTime = 90;
+        timePrint = totalTime - timePrint;
+
+        this.printTime = this.add.text(570, 95, 'time:' + timePrint, { fill: '#000000', fontSize: '35px'}).setOrigin(0,0);
+        
+    }
+
+    endGameUsingTimer() {
+        this.physics.pause();
+        this.endScreen();
+    
+    }
+
 
     //*********************after update**************************//
 
@@ -693,8 +747,7 @@ class PlayScene extends Phaser.Scene {
             this.armor = this.collectArmorGroup.create(this.collectArmorDistance, this.collectArmorHeight, 'armor');
             this.collectArmorDistance += 15000;
             this.armor.setScale(.3);
-            
-
+        
             //set collision box
             this.armor.body.setSize(200,200);
         }
@@ -714,8 +767,6 @@ class PlayScene extends Phaser.Scene {
         this.healthCollider.active = true;
         this.damageCollider2.active = false;
         this.healthCollider2.active = true;
-
-        
     }
 
     //Cursors
@@ -908,9 +959,6 @@ class PlayScene extends Phaser.Scene {
 
         let velocityStopper = false;
 
-
-        
-
         if (left.isDown) {
             this.player.setVelocityX(-295);
             velocityStopper = true;
@@ -982,8 +1030,6 @@ class PlayScene extends Phaser.Scene {
         }
     }
 
-   
-
     resetVariables() {
         this.snakeTracker = 0;
         this.move1 = false;
@@ -994,6 +1040,10 @@ class PlayScene extends Phaser.Scene {
         //so horethball doesn't spawn when typing name
         this.horethBallReady = false;
         
+        this.stopTimerEnd = true;
+        if (this.printTime) {
+            this.printTime.destroy();
+        }
         this.music.stop();        
 
         //API call to save score, create config in future
@@ -1069,7 +1119,7 @@ class PlayScene extends Phaser.Scene {
         const { width, height } = this.sys.game.canvas;
          
         if (playerName.length < 14 && playerName.length > 3) {
-                await fetch('https://horethfly.herokuapp.com/leaderboard', {
+                await fetch('http://localhost:8080/leaderboard', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1098,7 +1148,6 @@ class PlayScene extends Phaser.Scene {
         } else if (playerName.length <= 3) {
             console.log('TOO SHORT');
             
-            
             this.errorNameLength = this.add.text(width / 2 - 22, height / 2 + 45 - 110, 'too short', { fill: 'red', fontSize: '35px'})
                 .setInteractive()
                 .setOrigin(.5, 0)
@@ -1122,7 +1171,7 @@ class PlayScene extends Phaser.Scene {
         let scoreWidthIncrement = 140;
 
         //get hiscore data and print to screen
-        fetch('https://horethfly.herokuapp.com/leaderboard', {
+        fetch('http://localhost:8080/leaderboard', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -1165,7 +1214,8 @@ class PlayScene extends Phaser.Scene {
         this.music.stop();
         this.endMusic.stop();
         this.wind.stop();
-        
+        this.gameTimer();
+        this.stopTimerEnd = false;
 
         if (this.snakeTracker > 0) {
             this.snakeTracker = 0;

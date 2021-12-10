@@ -1,5 +1,6 @@
 import WebFontFile from '../WebFontFile';
 import Phaser from "phaser";
+import Music from "./SOLsystems/Music";
 
 class PreloadScene extends Phaser.Scene {
 
@@ -29,7 +30,7 @@ class PreloadScene extends Phaser.Scene {
 		var loadingText = this.add.text(width / 2 , height / 2 + 80,"Loading: ", { fontSize: '32px', fill: '#FFF' }).setOrigin(0.5);
 
     //ALL LOADS BETWEEN COMMENTS
-    this.load.audio('theme', 'assets/audio/mainMusic.wav');
+    
     this.load.audio('endTheme', 'assets/audio/endMusic.wav');
     this.load.audio('wind', 'assets/audio/wind.wav');
     this.load.audio('snakeBoltSound', 'assets/audio/enemySnakeBoltSound.mp3');

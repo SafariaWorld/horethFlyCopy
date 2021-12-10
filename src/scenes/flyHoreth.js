@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import Music from "./SOLsystems/Music"
 import WebFontFile from '../WebFontFile';
 
 
@@ -164,9 +165,9 @@ class PlayScene extends Phaser.Scene {
     create() {
 
         const { width, height } = this.sys.game.canvas;
-        this.music = this.sound.add('theme', {volume: 0.2});
-        this.music.loop = true;
-        this.music.play();
+        //this.music = this.sound.add('theme', {volume: 0.2});
+        //this.music.loop = true;
+        //this.music.play();
 
         
         this.endMusic = this.sound.add('endTheme');
@@ -175,7 +176,7 @@ class PlayScene extends Phaser.Scene {
 
         this.wind = this.sound.add('wind', {volume: 0.1});
         this.wind.loop = true;
-        this.wind.play();
+        //this.wind.play();
 
         this.snakeBoltSound = this.sound.add('snakeBoltSound', {volume: 0.3});
         
@@ -213,6 +214,7 @@ class PlayScene extends Phaser.Scene {
         // this.createHorethBallCollider();       
      //   this.createPatrolDiamond();
         // let g = this.testFetch();
+        this.scene.get("Music").logMusic();
     }
 
     update() {
@@ -233,7 +235,7 @@ class PlayScene extends Phaser.Scene {
                 delay: 500,
                 callback: ()=>{
                     this.endScreen();
-                    this.endMusic.play();
+                    
                 },
                 loop: false
             })
@@ -301,7 +303,7 @@ class PlayScene extends Phaser.Scene {
         if (this.stopTimerEnd == false) {
             this.getElapsedTime();
         }
-        
+     
     }
 
     //****************TIMER*******************//
@@ -317,7 +319,7 @@ class PlayScene extends Phaser.Scene {
             }
         
         var elapsed = this.timerVariable.getElapsedSeconds()
-        console.log(elapsed);
+       // console.log(elapsed);
 
         let timePrint = null;
 
@@ -596,7 +598,7 @@ class PlayScene extends Phaser.Scene {
                     delay: 500,
                     callback: ()=>{
                         this.endScreen();
-                        this.endMusic.play();
+                    
                     },
                     loop: false
                 })
@@ -670,7 +672,7 @@ class PlayScene extends Phaser.Scene {
                 callback: ()=>{
                     
                     this.endScreen();
-                    this.endMusic.play();
+                    
                 },
                 loop: false
             })
@@ -1044,8 +1046,8 @@ class PlayScene extends Phaser.Scene {
         if (this.printTime) {
             this.printTime.destroy();
         }
-        this.music.stop();        
-
+       // this.music.stop();        
+        //this.endMusic.play();
         //API call to save score, create config in future
         console.log('fetch in endscreen line 969');
         
@@ -1119,7 +1121,7 @@ class PlayScene extends Phaser.Scene {
         const { width, height } = this.sys.game.canvas;
          
         if (playerName.length < 14 && playerName.length > 3) {
-                await fetch('https://horethfly.herokuapp.com/leaderboard', {
+                await fetch('http://localhost:8080/leaderboard', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1174,7 +1176,7 @@ class PlayScene extends Phaser.Scene {
         let scoreWidthIncrement = 140;
 
         //get hiscore data and print to screen
-        fetch('https://horethfly.herokuapp.com/leaderboard', {
+        fetch('http://localhost:8080/leaderboard', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -1214,7 +1216,7 @@ class PlayScene extends Phaser.Scene {
         this.move2 = false;
         this.move3 = false;
         this.move4 = false;
-        this.music.stop();
+        //this.music.stop();
         this.endMusic.stop();
         this.wind.stop();
         this.gameTimer();

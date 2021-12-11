@@ -28,9 +28,6 @@ class PlayScene extends Phaser.Scene {
         this.brightness = null;
         this.birdsRight = null;
         this.birdsLeft = null;
-        this.music = null;
-        this.endMusic = null;
-        this.wind = null;
         this.player = null;
         this.playerVersion2 = null; //check on this to replace with original player
         this.foreground_2 = null;
@@ -153,6 +150,12 @@ class PlayScene extends Phaser.Scene {
         this.printTime = null;
         this.stopTimerEnd = false;
 
+        //sound
+        this.mute = false;
+        this.music = null;
+        this.endMusic = null;
+        this.wind = null;
+
     }
 
     
@@ -214,7 +217,11 @@ class PlayScene extends Phaser.Scene {
         // this.createHorethBallCollider();       
      //   this.createPatrolDiamond();
         // let g = this.testFetch();
-        this.scene.get("Music").logMusic();
+        this.scene.get("Music").playMusic(this.mute);
+        this.scene.get("Music").displayMuteButton(this.mute);
+        
+        
+        //value1(200,200)
     }
 
     update() {
@@ -344,111 +351,6 @@ class PlayScene extends Phaser.Scene {
 
 
     //*********************after update**************************//
-
-    //testing new methods for pathing
-
-
-    //***********************************WORK IN PROGRESS***********************************//
-    //Patrol Diamond Functions
-    createPatrolDiamond() {
-        this.patrolDiamond = this.damageGroup.create(1400,550, 'patrolDiamond');
-        this.patrolDiamond.setScale(.7);     
-        this.movePatrolDiamond(); 
-    }
-
-    movePatrolDiamond() {
-        this.patrolDiamond.setVelocityX(-300);
-        this.patrolDiamondMoving = true;
-    } 
-
-    initialPatrolDiamondStop() {
-        if (this.patrolDiamond.x < 899 & this.move1 == false) {
-            this.patrolDiamond.setVelocityX(0);
-            this.patrolDiamond.setVelocityY(0);
-            this.move1 = true;
-            this.initialMoveCheckDiamond = true;
-            
-            this.time.addEvent({
-                delay: 1800,
-                callback: ()=>{
-                    this.patrolDiamondMoving = false;
-                },
-                loop: false
-            })
-        }
-    }
-
-    afterPatrolDiamondMove() {
-
-        //move diamond up 375 pixels
-        if (this.patrolDiamondMoveCheck < 1) {
-
-            for (let i = 0; i <= 750; i++) {
-                this.time.addEvent({
-                    delay: this.trueDelay += 2, //changes speed of change
-                    callback: ()=>{
-                        this.patrolDiamond.y -= .5; //distance per move
-
-                        if (i == 750) {
-                            this.move1 = true;
-                            this.trueDelay = 500;
-                        }
-                    },
-                    loop: false
-                })
-            }
-
-            this.patrolDiamondMoveCheck += 1;
-        }
-
-        if (this.patrolDiamondMoveCheck == 1 && this.move1 == true && this.patrolDiamond.y == 174.5 && this.move2 == false) {
-            
-
-        
-                this.time.addEvent({
-                    delay: 400, //changes speed of change
-                    callback: ()=>{
-                        this.patrolDiamond.setVelocityX(100); //distance per move
-                        this.move2 = true;
-                    },
-                    loop: false
-                })
-            
-        }
-        
-        
-    }
-
-    // secondDiamondMove() {
-
-    //     if (this.patrolDiamond.y < 200 && this.move2 == false) {
-    //         this.patrolDiamond.y += 0;
-    //         this.patrolDiamondMoving = true;
-    //         this.move2 = true;
-    //         this.time.addEvent({
-    //             delay: 1800,
-    //             callback: ()=>{
-    //                 this.patrolDiamondMoving = false;
-    //             },
-    //             loop: false
-    //         })
-    //     }
-    //     if (this.patrolDiamond.x > 889 && this.patrolDiamondMoving == false) {
-    //         this.patrolDiamond.y -= 5;
-    //         this.patrolDiamond.x += 1.5;
-    //         console.log("secondDiamons");
-    //     }
-    // }
-
-    // thirdDiamondMove() {
-    //     if ( this.patrolDiamond.y < 200 && this.patrolDiamondMoving == false && this.patrolDiamond.x < 1150) {
-    //         //this.patrolDiamond.x += 5;
-    //         console.log('third move');
-    //     }
-
-    // }
-    //***********************************WORK IN PROGRESS END***********************************//
-
     
     //Game Functions for Phaser function "create"
     createPlayer() {

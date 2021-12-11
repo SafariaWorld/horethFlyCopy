@@ -37,6 +37,8 @@ class PreloadScene extends Phaser.Scene {
     this.load.audio('startMusic', 'assets/audio/startMusic.wav');
 
         this.load.image('topUI', 'assets/topUI.png');
+        this.load.image('mute', '/assets/mute.png');
+        this.load.image('unmute', '/assets/unmute.png');
 
       //start UI
       this.load.image('junglePanelMain', 'assets/junglePanelMain.png');
@@ -114,7 +116,7 @@ class PreloadScene extends Phaser.Scene {
 
 	complete() {
     //Change to first scene
-    this.scene.start("titleScene");
+      this.scene.start("titleScene");
 	}
 
 }

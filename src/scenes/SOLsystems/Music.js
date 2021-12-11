@@ -1,4 +1,5 @@
 import Phaser from "phaser"
+import PlayScene from "../flyHoreth";
 
 
 class Music extends Phaser.Scene {
@@ -6,13 +7,21 @@ class Music extends Phaser.Scene {
     constructor() {
         super({ key: 'Music'});
 
-        //this.titleScreenMusic = null;
-        //this.playSceneMusic = null; 
-        //this.endSceneMusic = null;
+        this.titleScreenMusic = null;
+        this.playSceneMusic = null; 
+        this.endSceneMusic = null;
+
+        this.mute = false;
+        this.muteButton = null;
+        
     };
 
     preload() {
         this.load.audio('theme', '../assets/audio/mainMusic.wav');
+        this.load.image('mute', '../assets/mute.png');
+        this.load.image('unmute', '../assets/unmute.png');
+        this.load.image('land', '../assets/sun.png');
+
     }
     
     create() {
@@ -20,10 +29,23 @@ class Music extends Phaser.Scene {
         this.scene.switch('PlayScene');
     }
     
-    logMusic() {
-        this.playSceneMusic.play();
+    playMusic(muteValue) {
+
+        this.mute = muteValue;
+
+        if (this.mute == false) {
+            this.playSceneMusic.play();
+        }
+        
         console.log('music file activated');
     }
+
+    displayMuteButton(muteValue) {
+        this.muteButton = this.add.image( PlayScene ,300,300, 'mute');
+        console.log('mutebutton');
+    }
+
+
 
 }
 export default Music;

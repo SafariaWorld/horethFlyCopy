@@ -324,6 +324,7 @@ class PlayScene extends Phaser.Scene {
         
             currentScene.mute = currentScene.scene.get("Music").setMute(currentScene.mute); 
             currentScene.muteButton.destroy();
+            
             if (currentScene.mute == false) {
                 currentScene.muteButton = currentScene.add.image(1255,78, 'unmute');
             } else {

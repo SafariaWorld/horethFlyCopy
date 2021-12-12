@@ -39,6 +39,9 @@ class PreloadScene extends Phaser.Scene {
         this.load.image('topUI', 'assets/topUI.png');
         this.load.image('mute', '/assets/mute.png');
         this.load.image('unmute', '/assets/unmute.png');
+        this.load.image('mute', '../assets/mute.png');
+        this.load.image('unmute', '../assets/unmute.png');
+       
 
       //start UI
       this.load.image('junglePanelMain', 'assets/junglePanelMain.png');

@@ -18,10 +18,6 @@ class Music extends Phaser.Scene {
 
     preload() {
         this.load.audio('theme', '../assets/audio/mainMusic.wav');
-        this.load.image('mute', '../assets/mute.png');
-        this.load.image('unmute', '../assets/unmute.png');
-        this.load.image('land', '../assets/sun.png');
-
     }
     
     create() {
@@ -37,13 +33,24 @@ class Music extends Phaser.Scene {
             this.playSceneMusic.play();
         }
         
-        console.log('music file activated');
     }
 
-    displayMuteButton(muteValue) {
-        this.muteButton = this.add.image( PlayScene ,300,300, 'mute');
-        console.log('mutebutton');
+    setMute(muteValue) {
+
+        if (this.mute == false) {
+            this.mute = true;
+            this.playSceneMusic.stop();
+        } else {
+            this.mute = false
+            this.playSceneMusic.play();
+        }
+
+
+
+        return this.mute;
     }
+
+  
 
 
 

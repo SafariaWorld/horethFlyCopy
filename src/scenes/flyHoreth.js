@@ -155,6 +155,8 @@ class PlayScene extends Phaser.Scene {
         this.music = null;
         this.endMusic = null;
         this.wind = null;
+        this.muteButton = null;
+        this.unmuteButton = null;
 
     }
 
@@ -213,15 +215,8 @@ class PlayScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-SPACE', this.createHorethBall, this);
 
       
-      this.gameTimer();  
-        // this.createHorethBallCollider();       
-     //   this.createPatrolDiamond();
-        // let g = this.testFetch();
-        this.scene.get("Music").playMusic(this.mute);
-        this.scene.get("Music").displayMuteButton(this.mute);
-        
-        
-        //value1(200,200)
+      this.gameTimer(); 
+      this.musicConnector();
     }
 
     update() {
@@ -312,6 +307,40 @@ class PlayScene extends Phaser.Scene {
         }
      
     }
+
+    musicConnector() {
+        
+        this.scene.get("Music").playMusic(this.mute);
+        
+        if (this.mute == false) {
+            this.muteButton = this.add.image(1255,78, 'unmute');
+        } else {
+            this.muteButton = this.add.image(1255, 78, 'mute');
+        }  
+
+        let currentScene = this;
+
+        this.muteButton.setInteractive().on('pointerout', function() {
+        
+            currentScene.mute = currentScene.scene.get("Music").setMute(currentScene.mute); 
+            currentScene.muteButton.destroy();
+            if (currentScene.mute == false) {
+                currentScene.muteButton = currentScene.add.image(1255,78, 'unmute');
+            } else {
+                currentScene.muteButton = currentScene.add.image(1255, 78, 'mute');
+            }  
+                      
+            
+        });
+        
+    }
+
+
+
+
+
+
+    //old is below// 
 
     //****************TIMER*******************//
 

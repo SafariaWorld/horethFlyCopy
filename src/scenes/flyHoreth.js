@@ -151,13 +151,6 @@ class PlayScene extends Phaser.Scene {
         this.stopTimerEnd = false;
 
         //sound
-        this.mute = true;
-        this.music = null;
-        this.endMusic = null;
-        this.wind = null;
-        this.muteButton = null;
-        this.unmuteButton = null;
-        this.destroyMuteButton = false;
         this.endScreenUp = null;
 
     }
@@ -173,9 +166,6 @@ class PlayScene extends Phaser.Scene {
         this.endScreenUp = false;
 
         const { width, height } = this.sys.game.canvas;
-        this.music = this.sound.add('theme', {volume: 0.2});
-        this.music.loop = true;
-        //this.music.play();
 
         
         this.endMusic = this.sound.add('endTheme');
@@ -219,9 +209,6 @@ class PlayScene extends Phaser.Scene {
 
       
       this.gameTimer(); 
-      this.setMusic();
-      this.musicConnector();
-      
     }
 
     update() {
@@ -310,104 +297,8 @@ class PlayScene extends Phaser.Scene {
         if (this.stopTimerEnd == false) {
             this.getElapsedTime();
         }
-
-        if (this.destroyMuteButton == true) {
-            this.muteButton.destroy();
-            this.destroyMuteButton = false;
-            this.setMusic();
-            this.musicConnector();
-        }
      
     }
-
-    addMusicButton() {
-
-        if (this.mute == false) {
-            this.muteButton = this.add.image(1255,78, 'unmute');
-        } else {
-            this.muteButton = this.add.image(1255, 78, 'mute');
-        }
-
-    }
-
-    musicConnector() {
-        
-        let currentScene = this;
-
-        console.log(this.muteButton);
-        this.muteButton.setInteractive();
-        this.muteButton.on('pointerup', function() {
-            //currentScene.test1(currentScene.muteButton);
-            currentScene.destroyMuteButton = true;
-        }); 
-        
-    }
-
-    setMusic() {
- 
-        if (this.mute == false) {
-            this.mute = true;
-        } else {
-            this.mute = false;
-        }
-
-
-        if (this.mute == false) {
-            this.muteButton = this.add.image(1255,78, 'unmute');
-
-            if (this.endScreenUp == true) {
-                this.endMusic.play();
-            } else {
-                this.music.play();
-            }
-            
-        } else {
-            this.muteButton = this.add.image(1255, 78, 'mute');
-            
-            if (this.endScreenUp == true) {
-                this.endMusic.stop();
-            } else {
-                this.music.stop();
-            }
-        
-        } 
-
-
-    }
-
-    // setMusicButton() {
-    //     if (this.mute == false) {
-    //         this.muteButton = this.add.image(1255,78, 'unmute');
-    //     } else {
-    //         this.muteButton = this.add.image(1255, 78, 'mute');
-    //     }  
-
-    //     let currentScene = this;
-
-    //     this.muteButton.setInteractive().on('pointerout', currentScene.switchMuteButton)
-    // }
-
-    // switchMuteButton() {
-
-    //     if (this.muteButton) {
-    //         this.muteButton.destroy();
-    //     }
-        
-    //     if (this.mute == false) {
-    //         this.mute = true;
-    //     } else {
-    //         this.mute = false;
-    //     }
-
-    //     if (this.mute == false) {
-    //         this.muteButton = this.add.image(1255,78, 'unmute');
-    //     } else {
-    //         this.muteButton = this.add.image(1255, 78, 'mute');
-    //     }  
-    // }
-
-
-
 
 
     //old is below// 
@@ -1049,12 +940,7 @@ class PlayScene extends Phaser.Scene {
             this.printTime.destroy();
         }
 
-        if (this.mute == false) {
-            this.endMusic.play();
-        } else {
-            this.endMusic.stop();
-        }
-        this.music.stop();        
+          
         
         //API call to save score, create config in future
         console.log('fetch in endscreen line 969');
@@ -1129,7 +1015,7 @@ class PlayScene extends Phaser.Scene {
         const { width, height } = this.sys.game.canvas;
          
         if (playerName.length < 14 && playerName.length > 3) {
-                await fetch('http://localhost:8080/leaderboard', {
+                await fetch('https://horethfly.herokuapp.com/leaderboard', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1184,7 +1070,7 @@ class PlayScene extends Phaser.Scene {
         let scoreWidthIncrement = 140;
 
         //get hiscore data and print to screen
-        fetch('http://localhost:8080/leaderboard', {
+        fetch('https://horethfly.herokuapp.com/leaderboard', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -1224,8 +1110,6 @@ class PlayScene extends Phaser.Scene {
         this.move2 = false;
         this.move3 = false;
         this.move4 = false;
-        //this.music.stop();
-        this.endMusic.stop();
         this.wind.stop();
         this.gameTimer();
         this.stopTimerEnd = false;

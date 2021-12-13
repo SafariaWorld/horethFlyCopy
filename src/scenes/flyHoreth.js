@@ -1,6 +1,6 @@
 import Phaser from "phaser";
-import Music from "./SOLsystems/Music"
 import WebFontFile from '../WebFontFile';
+
 
 
 
@@ -151,12 +151,14 @@ class PlayScene extends Phaser.Scene {
         this.stopTimerEnd = false;
 
         //sound
-        this.mute = false;
+        this.mute = true;
         this.music = null;
         this.endMusic = null;
         this.wind = null;
         this.muteButton = null;
         this.unmuteButton = null;
+        this.destroyMuteButton = false;
+        this.endScreenUp = null;
 
     }
 
@@ -168,10 +170,11 @@ class PlayScene extends Phaser.Scene {
     }
 
     create() {
+        this.endScreenUp = false;
 
         const { width, height } = this.sys.game.canvas;
-        //this.music = this.sound.add('theme', {volume: 0.2});
-        //this.music.loop = true;
+        this.music = this.sound.add('theme', {volume: 0.2});
+        this.music.loop = true;
         //this.music.play();
 
         
@@ -216,7 +219,9 @@ class PlayScene extends Phaser.Scene {
 
       
       this.gameTimer(); 
+      this.setMusic();
       this.musicConnector();
+      
     }
 
     update() {
@@ -305,37 +310,101 @@ class PlayScene extends Phaser.Scene {
         if (this.stopTimerEnd == false) {
             this.getElapsedTime();
         }
+
+        if (this.destroyMuteButton == true) {
+            this.muteButton.destroy();
+            this.destroyMuteButton = false;
+            this.setMusic();
+            this.musicConnector();
+        }
      
     }
 
-    musicConnector() {
-        
-        this.scene.get("Music").playMusic(this.mute);
-        
+    addMusicButton() {
+
         if (this.mute == false) {
             this.muteButton = this.add.image(1255,78, 'unmute');
         } else {
             this.muteButton = this.add.image(1255, 78, 'mute');
-        }  
+        }
 
+    }
+
+    musicConnector() {
+        
         let currentScene = this;
 
-        this.muteButton.setInteractive().on('pointerout', function() {
-        
-            currentScene.mute = currentScene.scene.get("Music").setMute(currentScene.mute); 
-            currentScene.muteButton.destroy();
-            
-            if (currentScene.mute == false) {
-                currentScene.muteButton = currentScene.add.image(1255,78, 'unmute');
-            } else {
-                currentScene.muteButton = currentScene.add.image(1255, 78, 'mute');
-            }  
-                      
-            
-        });
+        console.log(this.muteButton);
+        this.muteButton.setInteractive();
+        this.muteButton.on('pointerup', function() {
+            //currentScene.test1(currentScene.muteButton);
+            currentScene.destroyMuteButton = true;
+        }); 
         
     }
 
+    setMusic() {
+ 
+        if (this.mute == false) {
+            this.mute = true;
+        } else {
+            this.mute = false;
+        }
+
+
+        if (this.mute == false) {
+            this.muteButton = this.add.image(1255,78, 'unmute');
+
+            if (this.endScreenUp == true) {
+                this.endMusic.play();
+            } else {
+                this.music.play();
+            }
+            
+        } else {
+            this.muteButton = this.add.image(1255, 78, 'mute');
+            
+            if (this.endScreenUp == true) {
+                this.endMusic.stop();
+            } else {
+                this.music.stop();
+            }
+        
+        } 
+
+
+    }
+
+    // setMusicButton() {
+    //     if (this.mute == false) {
+    //         this.muteButton = this.add.image(1255,78, 'unmute');
+    //     } else {
+    //         this.muteButton = this.add.image(1255, 78, 'mute');
+    //     }  
+
+    //     let currentScene = this;
+
+    //     this.muteButton.setInteractive().on('pointerout', currentScene.switchMuteButton)
+    // }
+
+    // switchMuteButton() {
+
+    //     if (this.muteButton) {
+    //         this.muteButton.destroy();
+    //     }
+        
+    //     if (this.mute == false) {
+    //         this.mute = true;
+    //     } else {
+    //         this.mute = false;
+    //     }
+
+    //     if (this.mute == false) {
+    //         this.muteButton = this.add.image(1255,78, 'unmute');
+    //     } else {
+    //         this.muteButton = this.add.image(1255, 78, 'mute');
+    //     }  
+    // }
 
 
 
@@ -971,6 +1040,7 @@ class PlayScene extends Phaser.Scene {
     }
 
     async endScreen() {
+        this.endScreenUp = true;
         //so horethball doesn't spawn when typing name
         this.horethBallReady = false;
         
@@ -978,8 +1048,14 @@ class PlayScene extends Phaser.Scene {
         if (this.printTime) {
             this.printTime.destroy();
         }
-       // this.music.stop();        
-        //this.endMusic.play();
+
+        if (this.mute == false) {
+            this.endMusic.play();
+        } else {
+            this.endMusic.stop();
+        }
+        this.music.stop();        
+        
         //API call to save score, create config in future
         console.log('fetch in endscreen line 969');
         
@@ -1153,6 +1229,12 @@ class PlayScene extends Phaser.Scene {
         this.wind.stop();
         this.gameTimer();
         this.stopTimerEnd = false;
+
+        if (this.mute == false) {
+            this.mute = true;
+        } else {
+            this.mute = false;
+        }
 
         if (this.snakeTracker > 0) {
             this.snakeTracker = 0;

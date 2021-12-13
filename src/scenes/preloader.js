@@ -1,6 +1,6 @@
 import WebFontFile from '../WebFontFile';
 import Phaser from "phaser";
-import Music from "./SOLsystems/Music";
+
 
 class PreloadScene extends Phaser.Scene {
 
@@ -35,6 +35,7 @@ class PreloadScene extends Phaser.Scene {
     this.load.audio('wind', 'assets/audio/wind.wav');
     this.load.audio('snakeBoltSound', 'assets/audio/enemySnakeBoltSound.mp3');
     this.load.audio('startMusic', 'assets/audio/startMusic.wav');
+    this.load.audio('theme', 'assets/audio/mainMusic.wav');
 
         this.load.image('topUI', 'assets/topUI.png');
         this.load.image('mute', '/assets/mute.png');

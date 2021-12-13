@@ -3,7 +3,7 @@ import TitleScene from "./scenes/titleScene";
 import flyHoreth from './scenes/flyHoreth';
 import PreloadScene from "./scenes/preloader";
 import PlayScene from "./scenes/flyHoreth";
-import Music from "./scenes/SOLsystems/Music"
+
 
 // const titleScene = new TitleScene();
 // const playScene = new flyHoreth();
@@ -25,7 +25,7 @@ const config = {
         }
         
     },
-    scene: [PreloadScene, TitleScene, PlayScene, Music ]
+    scene: [PreloadScene, TitleScene, PlayScene]
 };
 
 const game = new Phaser.Game(config);

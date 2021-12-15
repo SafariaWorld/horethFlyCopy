@@ -226,7 +226,7 @@ class PlayScene extends Phaser.Scene {
 
     update() {
         this.background.tilePositionX += 0.2;
-        this.foreground.tilePositionX += 6.8;
+        this.foreground.tilePositionX += 3.8;
         this.sun.tilePositionX += 0.05;
         this.clouds.tilePositionX += 1;
         this.foreground_2.tilePositionX += .7;

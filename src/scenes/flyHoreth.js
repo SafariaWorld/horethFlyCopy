@@ -164,14 +164,14 @@ class PlayScene extends Phaser.Scene {
         this.createPlayer();
         this.createCursorAndKeyUpKeyDown();
         
-        this.createFireAndElectricBall();
-        this.createDamageCollider();
-        this.createElectricCollider();
+        //this.createFireAndElectricBall();
+       // this.createDamageCollider();
+        //this.createElectricCollider();
         this.createCoins();
         this.createCollectOverlap();
 
-        this.createArmor();
-        this.createCollectArmorOverlap();
+        //this.createArmor();
+        //this.createCollectArmorOverlap();
 
         this.orbSound = this.sound.add('orbSound', {volume: 1.2});
         this.goldCollectSound = this.sound.add('goldCollectSound', {volume: .4});
@@ -191,7 +191,10 @@ class PlayScene extends Phaser.Scene {
         this.gameTimer(); 
         this.setMusic();
         this.activateMuteButton();
-      
+        this.createGroups();
+        this.createFireAndElectricAnimation();
+
+        this.itemFactory(this.damageWaveKey());
     }
 
     update() {
@@ -228,9 +231,9 @@ class PlayScene extends Phaser.Scene {
         }
 
         //Checks electric ball position and sets Y velocity up or down
-        if (this.electricball) {
-            this.checkElectricBallPositionAndMove();
-        }
+        // if (this.electricball) {
+        //     this.checkElectricBallPositionAndMove();
+        // }
         
         let tracker = 0;
 
@@ -273,8 +276,92 @@ class PlayScene extends Phaser.Scene {
             this.setMusic();
             this.activateMuteButton();
         }
+
+        if (this.fireball) {
+            if (this.damageGroup.getChildren().x < 100) {
+                this.fireball.destroy();
+                console.log('fireball destroyed');
+            }
+        }
+        
+        if (this.electricball) {
+            if (this.electricGroup.getChildren().x < 100) {
+                this.electricball.destroy();
+                console.log('electricball destroyed');
+            }
+        }
+
+        if (this.electricball) {
+            if (this.lastChildXPosition(this.electricGroup.getChildren()) 
+                < 500) 
+            {
+                this.itemFactory(this.damageWaveKey());
+
+            }
+        }
+        
      
     }
+
+    //sets the amounts and frequency of spawning
+    damageWaveKey() {
+        
+        let key = {
+            fire: true, //will be param
+            electricOne: true, //will be param
+            electricTwo: true,  //will be param
+            frequency: 2    //will be param 
+        }
+
+        return key;
+    }
+
+    //create fireballs and electricballs based on keys
+    itemFactory(key) {
+        
+        let originalPosition = 1600;
+
+        for (let i = 0; i <= key.frequency; i++) {
+            if (key.fire == true) {
+                this.fireball = this.damageGroup.create(originalPosition, 300, 'newFireBall').play('fireBallAnimation');
+                this.fireball.setScale(.9);
+                this.fireball.setVelocityX(-350);
+            } 
+    
+            if (key.electricOne == true) {
+                this.electricball = this.electricGroup.create(originalPosition + 200, 150, 'newElectricBall').play('electricBallAnimation');
+                this.electricball.setScale(.6);
+                this.electricball.setVelocityX(-350);
+            }
+    
+            if (key.electricTwo == true) {
+                if (key.electricOne == true) {
+                    this.electricball = this.electricGroup.create(originalPosition + 400, 650, 'newElectricBall').play('electricBallAnimation');
+                    this.electricball.setScale(.6);
+                    this.electricball.setVelocityX(-350);
+                }
+            }
+
+            originalPosition += 1000;
+        }
+
+        //testing children
+        console.log(this.electricGroup.getChildren(), "- when one fails");
+    }
+
+    //set damageSpawnTracker to the last child
+
+    
+    lastChildXPosition(localList) {
+
+
+        return localList[localList.length - 1].x
+
+    
+    }
+
+
+
     //*********************after update**************************//
 
     //Game Function for Phaser function "update"
@@ -286,6 +373,7 @@ class PlayScene extends Phaser.Scene {
         if (left.isDown) {
             this.player.setVelocityX(-295);
             velocityStopper = true;
+        
 
         if (this.armorCollected == false) {
             this.player.setFrame(3);   
@@ -426,7 +514,7 @@ class PlayScene extends Phaser.Scene {
              this.printTime.destroy();
         }
         
-        var elapsed = this.timerVariable.getElapsedSeconds()
+        var elapsed = this.timerVariable.getElapsedSeconds();
        
 
         let timePrint = null;
@@ -483,14 +571,13 @@ class PlayScene extends Phaser.Scene {
         this.clouds = this.add.tileSprite(1250, 360, 2540, 720, 'clouds');
     }
 
-    //------------------------------Fire and Electric Ball and Damage Group ---------------------------//
-    createFireAndElectricBall() {
+    createGroups() {
         this.damageGroup = this.physics.add.group();
         this.electricGroup = this.physics.add.group();
+    }
 
-        this.damageItemDistance = 1000;
-        
-        //crating animations for each fireball and electriball
+    createFireAndElectricAnimation() {
+        //creating animations for each fireball and electriball
         this.newFireBall = {
             key: 'fireBallAnimation',
             frames: this.anims.generateFrameNumbers('newFireBall', {start: 0, end: 5, first: 0}),
@@ -508,177 +595,204 @@ class PlayScene extends Phaser.Scene {
         }
 
         this.anims.create(this.newElectricBall);
-
-        //creates all the fireballs/electricballs, position, scale, collision box
-        for (let i = 0; i < 50; i++) {
-
-            this.damageItemDistance += 400;
-            this.damageItemHeight = Math.random() * (600 - 50) + 50;   
-
-            this.fireball = this.damageGroup.create(this.damageItemDistance, this.damageItemHeight, 'newFireBall').play('fireBallAnimation');
-            this.fireball.setScale(.9);
-
-            //set collision box
-            this.fireball.body.setSize(60,60);
-            this.fireball.body.setOffset(25, 50);
-            this.fireBallCount += 1;
-
-            this.damageItemDistance += 200;
-            this.damageItemHeight = Math.random() * (600 - 50) + 50;
-
-            this.electricball = this.electricGroup.create(this.damageItemDistance, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
-            this.electricball.setScale(.6);
-            this.createElectricballMovement(this.electricball.y);
-
-            //set collision box
-            this.electricball.body.setSize(100,100);
-
-            this.damageItemDistance += 200;
-            this.damageItemHeight = Math.random() * (600 - 50) + 50;
-            this.electricball = this.electricGroup.create(this.damageItemDistance, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
-            this.electricball.setScale(.6);
-            this.createElectricballMovement(this.electricball.y);
-
-            //set collision box
-            this.electricball.body.setSize(100,100);
-        }
-
-        //sets the velocity after all have electric/fire balls have been created
-        this.damageGroup.setVelocityX(-350);
-        this.electricGroup.setVelocityX(-350);
-        
     }
 
-    //up and down movement
-    createElectricballMovement() {
+    //------------------------------Fire and Electric Ball and Damage Group ---------------------------//
+    // createFireAndElectricBall() {
+    //     this.damageGroup = this.physics.add.group();
+    //     this.electricGroup = this.physics.add.group();
 
-        if (this.electricball.y > 600) {
-            this.electricball.setVelocityY(200);
-        } else {
-            this.electricball.setVelocityY(-200);
-        }
+    //     this.damageItemDistance = 1000;
         
-    }
+    //     //crating animations for each fireball and electriball
+    //     this.newFireBall = {
+    //         key: 'fireBallAnimation',
+    //         frames: this.anims.generateFrameNumbers('newFireBall', {start: 0, end: 5, first: 0}),
+    //         frameRate: 5,
+    //         repeat: -1
+    //     }
 
-    //Unsure why this works at the moment, but without the electricballs don't appear
-    checkElectricBallPositionAndMove() {
+    //     this.anims.create(this.newFireBall);
 
-        for (let i = 0; i < this.electricGroup.getChildren().length; i++) {
+    //     this.newElectricBall = {
+    //         key: 'electricBallAnimation',
+    //         frames: this.anims.generateFrameNumbers('newElectricBall', {start:0, end:8, first:0}),
+    //         frameRate: 6,
+    //         repeat: -1
+    //     }
+
+    //     this.anims.create(this.newElectricBall);
+
+    //     //creates all the fireballs/electricballs, position, scale, collision box
+    //     for (let i = 0; i < 50; i++) {
+
+    //         this.damageItemDistance += 400;
+    //         this.damageItemHeight = Math.random() * (600 - 50) + 50;   
+
+    //         this.fireball = this.damageGroup.create(this.damageItemDistance, this.damageItemHeight, 'newFireBall').play('fireBallAnimation');
+    //         this.fireball.setScale(.9);
+
+    //         //set collision box
+    //         this.fireball.body.setSize(60,60);
+    //         this.fireball.body.setOffset(25, 50);
+    //         this.fireBallCount += 1;
+
+    //         this.damageItemDistance += 200;
+    //         this.damageItemHeight = Math.random() * (600 - 50) + 50;
+
+    //         this.electricball = this.electricGroup.create(this.damageItemDistance, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
+    //         this.electricball.setScale(.6);
+    //         this.createElectricballMovement(this.electricball.y);
+
+    //         //set collision box
+    //         this.electricball.body.setSize(100,100);
+
+    //         this.damageItemDistance += 200;
+    //         this.damageItemHeight = Math.random() * (600 - 50) + 50;
+    //         this.electricball = this.electricGroup.create(this.damageItemDistance, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
+    //         this.electricball.setScale(.6);
+    //         this.createElectricballMovement(this.electricball.y);
+
+    //         //set collision box
+    //         this.electricball.body.setSize(100,100);
+    //     }
+
+    //     //sets the velocity after all have electric/fire balls have been created
+    //     this.damageGroup.setVelocityX(-350);
+    //     this.electricGroup.setVelocityX(-350);
+        
+    // }
+
+    // //up and down movement
+    // createElectricballMovement() {
+
+    //     if (this.electricball.y > 600) {
+    //         this.electricball.setVelocityY(200);
+    //     } else {
+    //         this.electricball.setVelocityY(-200);
+    //     }
+        
+    // }
+
+    // //Unsure why this works at the moment, but without the electricballs don't appear
+    // checkElectricBallPositionAndMove() {
+
+    //     for (let i = 0; i < this.electricGroup.getChildren().length; i++) {
            
-                if (this.electricGroup.getChildren()[i].y < 55) {
-                    this.electricGroup.getChildren()[i].setVelocityY(200);
-                } 
+    //             if (this.electricGroup.getChildren()[i].y < 55) {
+    //                 this.electricGroup.getChildren()[i].setVelocityY(200);
+    //             } 
         
-                if (this.electricGroup.getChildren()[i].y > 680) {
-                    this.electricGroup.getChildren()[i].setVelocityY(-200);
-                }
-        }
-    }
+    //             if (this.electricGroup.getChildren()[i].y > 680) {
+    //                 this.electricGroup.getChildren()[i].setVelocityY(-200);
+    //             }
+    //     }
+    // }
     //-------------------- Colliders ---------------------//
 
     //Create both collider for player death and removing armor upon collision
     //Set damage (death) collider true, health collider false
     //Health collider is only used for armor
-    createDamageCollider() {
-        this.damageCollider = this.physics.add.collider(this.player, this.damageGroup, () => {
+    // createDamageCollider() {
+    //     this.damageCollider = this.physics.add.collider(this.player, this.damageGroup, () => {
     
-                this.physics.pause();
-                this.time.addEvent({
-                    delay: 500,
-                    callback: ()=>{
-                        this.endScreen();
-                    },
-                    loop: false
-                }) 
-        });
+    //             this.physics.pause();
+    //             this.time.addEvent({
+    //                 delay: 500,
+    //                 callback: ()=>{
+    //                     this.endScreen();
+    //                 },
+    //                 loop: false
+    //             }) 
+    //     });
         
-        this.healthCollider = this.physics.add.overlap(this.player, this.damageGroup, this.changeArmorFalse, null, this);
+    //     this.healthCollider = this.physics.add.overlap(this.player, this.damageGroup, this.changeArmorFalse, null, this);
 
-        this.damageCollider.active = true;
-        this.healthCollider.active = false; 
-    }
+    //     this.damageCollider.active = true;
+    //     this.healthCollider.active = false; 
+    // }
 
     //Armor is removed, play blinks opacity, resets to damage collider
-    changeArmorFalse() {
-        this.armorCollected = false;
-        this.player.setAlpha(0.5);
+    // changeArmorFalse() {
+    //     this.armorCollected = false;
+    //     this.player.setAlpha(0.5);
 
-        this.time.addEvent({
-            delay: 300,
-            callback: ()=>{
-                this.player.setAlpha(1);
-            },
-            loop: false
-        })
+    //     this.time.addEvent({
+    //         delay: 300,
+    //         callback: ()=>{
+    //             this.player.setAlpha(1);
+    //         },
+    //         loop: false
+    //     })
 
-        this.time.addEvent({
-            delay: 600,
-            callback: ()=>{
-                this.player.setAlpha(.5);
-            },
-            loop: false
-        })
+    //     this.time.addEvent({
+    //         delay: 600,
+    //         callback: ()=>{
+    //             this.player.setAlpha(.5);
+    //         },
+    //         loop: false
+    //     })
 
-        this.time.addEvent({
-            delay: 900,
-            callback: ()=>{
-                this.player.setAlpha(1);
-            },
-            loop: false
-        })
+    //     this.time.addEvent({
+    //         delay: 900,
+    //         callback: ()=>{
+    //             this.player.setAlpha(1);
+    //         },
+    //         loop: false
+    //     })
 
-        this.time.addEvent({
-            delay: 1200,
-            callback: ()=>{
-                this.player.setAlpha(.5);
-            },
-            loop: false
-        })
+    //     this.time.addEvent({
+    //         delay: 1200,
+    //         callback: ()=>{
+    //             this.player.setAlpha(.5);
+    //         },
+    //         loop: false
+    //     })
 
-        this.time.addEvent({
-            delay: 1500,
-            callback: ()=>{
-                this.damageCollider.active = true;
-                this.healthCollider.active = false;
-                this.damageCollider2.active = true;
-                this.healthCollider2.active = false;
-                this.player.setAlpha(1);
-            },
-            loop: false
-        })
-    }
+    //     this.time.addEvent({
+    //         delay: 1500,
+    //         callback: ()=>{
+    //             this.damageCollider.active = true;
+    //             this.healthCollider.active = false;
+    //             this.damageCollider2.active = true;
+    //             this.healthCollider2.active = false;
+    //             this.player.setAlpha(1);
+    //         },
+    //         loop: false
+    //     })
+    // }
 
     //Sets the same collider as damage but for electric balls specifically
     //Set damage (death) collider true, health collider false
     //Health collider is only used for armor
-    createElectricCollider() {
-        this.damageCollider2 = this.physics.add.collider(this.player, this.electricGroup, () => {
-            this.player.setGravityY(300);
-            //console.log('add pause');
-            this.physics.pause();
-            this.time.addEvent({
-                delay: 500,
-                callback: ()=>{
+    // createElectricCollider() {
+    //     this.damageCollider2 = this.physics.add.collider(this.player, this.electricGroup, () => {
+    //         this.player.setGravityY(300);
+    //         //console.log('add pause');
+    //         this.physics.pause();
+    //         this.time.addEvent({
+    //             delay: 500,
+    //             callback: ()=>{
                     
-                    this.endScreen();
+    //                 this.endScreen();
                     
-                },
-                loop: false
-            })
+    //             },
+    //             loop: false
+    //         })
                 
-        });
+    //     });
     
-    this.healthCollider2 = this.physics.add.overlap(this.player, this.electricGroup, this.changeArmorFalse, null, this);
+    // this.healthCollider2 = this.physics.add.overlap(this.player, this.electricGroup, this.changeArmorFalse, null, this);
 
-    this.damageCollider2.active = true;
-    this.healthCollider2.active = false; 
-    }
+    // this.damageCollider2.active = true;
+    // this.healthCollider2.active = false; 
+    // }
 
     //-----------------------------Coins and collecting-------------------------//
     createCoins() {
         this.collectGroup = this.physics.add.group();
 
-        this.collectItemDistance = 800;
+        this.collectItemDistance = 1000;
 
         for (let i = 0; i < 50; i++) {
 
@@ -723,39 +837,39 @@ class PlayScene extends Phaser.Scene {
 
     //-------------------------------Create armor and collect--------------------------------//
 
-    createArmor() {
-        this.collectArmorGroup = this.physics.add.group();
+    // createArmor() {
+    //     this.collectArmorGroup = this.physics.add.group();
 
-        this.collectArmorDistance = 1500;
+    //     this.collectArmorDistance = 1500;
 
-        for (let i = 0; i < 2; i++) {
-            this.collectArmorHeight = Math.random() * (600 - 50) + 50;
-            this.armor = this.collectArmorGroup.create(this.collectArmorDistance, this.collectArmorHeight, 'armor');
-            this.collectArmorDistance += 15000;
-            this.armor.setScale(.3);
+    //     for (let i = 0; i < 2; i++) {
+    //         this.collectArmorHeight = Math.random() * (600 - 50) + 50;
+    //         this.armor = this.collectArmorGroup.create(this.collectArmorDistance, this.collectArmorHeight, 'armor');
+    //         this.collectArmorDistance += 15000;
+    //         this.armor.setScale(.3);
         
-            //set collision box
-            this.armor.body.setSize(200,200);
-        }
-        this.collectArmorGroup.setVelocityX(-350);
-    }
+    //         //set collision box
+    //         this.armor.body.setSize(200,200);
+    //     }
+    //     this.collectArmorGroup.setVelocityX(-350);
+    // }
 
     //armor collider
-    createCollectArmorOverlap() {
-        this.physics.add.overlap(this.player, this.collectArmorGroup, this.collectArmor, null, this);
-    }
+    // createCollectArmorOverlap() {
+    //     this.physics.add.overlap(this.player, this.collectArmorGroup, this.collectArmor, null, this);
+    // }
 
-    collectArmor(player, collectArmorGroup) {
-        collectArmorGroup.disableBody(true,true);
+    // collectArmor(player, collectArmorGroup) {
+    //     collectArmorGroup.disableBody(true,true);
 
-        //reset colliders for state
-        this.armorCollected = true;
-        this.armorCollectSound.play();
-        this.damageCollider.active = false;
-        this.healthCollider.active = true;
-        this.damageCollider2.active = false;
-        this.healthCollider2.active = true;
-    }
+    //     //reset colliders for state
+    //     this.armorCollected = true;
+    //     this.armorCollectSound.play();
+    //     this.damageCollider.active = false;
+    //     this.healthCollider.active = true;
+    //     this.damageCollider2.active = false;
+    //     this.healthCollider2.active = true;
+    // }
 
     //---------------------------create only 1 horeth ball---------------------------//
     createHorethBall() {
@@ -772,7 +886,7 @@ class PlayScene extends Phaser.Scene {
             this.orbSound.play();
         
             if (this.snake) {
-            console.log(this.playerDamageGroup, 'and', this.enemyGroup, "line");
+           // console.log(this.playerDamageGroup, 'and', this.enemyGroup, "line");
             this.physics.add.overlap(this.playerDamageGroup, this.enemyGroup, this.destroySnake, null, this);
             }
         }

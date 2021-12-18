@@ -8,17 +8,8 @@ class PlayScene extends Phaser.Scene {
 
     constructor() {
         super({
-        
             key: 'PlayScene',
-            // dom: {
-            //     createContainer: true
-            // }
         });
-
-        //test API
-        let g = null;
-    
-        
         
         this.background = null;
         this.backgroundBuildings = null;
@@ -33,8 +24,6 @@ class PlayScene extends Phaser.Scene {
         this.foreground_2 = null;
         this.foreground_3 = null;
         this.fireBallCount = 0;
-
-
 
         //controls
         this.cursors = null;
@@ -111,23 +100,10 @@ class PlayScene extends Phaser.Scene {
         
         //enemy Diamond
         this.patrolDiamond = null;
-        this.move1 = false;
-        this.move2 = false;
-        this.move3 = false;
-        this.move4 = false;
-        this.movePicker = null;
         this.patrolDiamondMoving = false;
         this.initialMoveCheckDiamond = false;
         this.patrolDiamondMoveCheck = 0;
         this.trueDelay = 400;
-
-        //Graphic following line 
-        this.line1 = null;
-        this.line2 = null;
-        this.follower = null;
-        this.path = null;
-        this.bounds = null;
-        this.graphics = null;
 
         //fireball Animation
         this.newFireBall = null;
@@ -144,7 +120,6 @@ class PlayScene extends Phaser.Scene {
         this.junglePanelLost = null;
 
         //timer
-
         this.timeElapsed = null;
         this.timerVariable = null;
         this.printTime = null;
@@ -152,12 +127,9 @@ class PlayScene extends Phaser.Scene {
 
         //sound
         this.endScreenUp = null;
-
     }
 
-    
-
-    //Phaser Functions
+    //located in preloader.js
     preload() {
         
     }
@@ -166,6 +138,9 @@ class PlayScene extends Phaser.Scene {
         this.endScreenUp = false;
 
         const { width, height } = this.sys.game.canvas;
+
+        this.music =this.sound.add('theme');
+        this.music.loop = true;
 
         
         this.endMusic = this.sound.add('endTheme');
@@ -178,19 +153,18 @@ class PlayScene extends Phaser.Scene {
 
         this.snakeBoltSound = this.sound.add('snakeBoltSound', {volume: 0.3});
         
-        
         this.createBackground();
         this.createPlayer();
         this.createCursorAndKeyUpKeyDown();
         
-        this.createFireAndElectricBall();
-        this.createDamageCollider();
-        this.createElectricCollider();
+        //this.createFireAndElectricBall();
+       // this.createDamageCollider();
+        //this.createElectricCollider();
         this.createCoins();
         this.createCollectOverlap();
 
-        this.createArmor();
-        this.createCollectArmorOverlap();
+        //this.createArmor();
+        //this.createCollectArmorOverlap();
 
         this.orbSound = this.sound.add('orbSound', {volume: 1.2});
         this.goldCollectSound = this.sound.add('goldCollectSound', {volume: .4});
@@ -207,42 +181,32 @@ class PlayScene extends Phaser.Scene {
         this.bluntImpactSound = this.sound.add('bluntImpactSound');
         this.input.keyboard.on('keydown-SPACE', this.createHorethBall, this);
 
-      
-      this.gameTimer(); 
+        this.gameTimer(); 
+        this.setMusic();
+        this.activateMuteButton();
+        this.createGroups();
+        this.createFireAndElectricAnimation();
+
+        this.itemFactory(this.damageWaveKey());
     }
 
     update() {
+        //parralax background movement
         this.background.tilePositionX += 0.2;
-        this.foreground.tilePositionX += 6.8;
+        this.foreground.tilePositionX += 3.8;
         this.sun.tilePositionX += 0.05;
         this.clouds.tilePositionX += 1;
         this.foreground_2.tilePositionX += .7;
         this.foreground_3.tilePositionX += .35;
 
-        //console.log(this.damageGroup.getChildren(5));
-    
-        
-       
-        if (this.player.x > this.damageGroup.getChildren(this.fireBallCount).x) {
-            
-            this.time.addEvent({
-                delay: 500,
-                callback: ()=>{
-                    this.endScreen();
-                    
-                },
-                loop: false
-            })
-        }
-
-
         this.setControls();
         
+        //if Horethball exists, check if it crosses x position then destroy object
         if(this.horethBall) {
-            //console.log('fasdf');
             this.removeHorethBall();
         }
 
+        //stops snake upon entry at certain x position
         if (this.snake) {
             this.checkAndStopSnake();
         }
@@ -255,27 +219,24 @@ class PlayScene extends Phaser.Scene {
             }
             
             if (this.initialMoveCheckDiamond == true) {
-                // this.secondDiamondMove();
-                // this.thirdDiamondMove();
                 this.afterPatrolDiamondMove();
-           
             }
-            
         }
-        
-        if (this.electricball) {
-            //console.log('check position');
-            this.checkElectricBallPositionAndMove();
-        }
+
+        //Checks electric ball position and sets Y velocity up or down
+        // if (this.electricball) {
+        //     this.checkElectricBallPositionAndMove();
+        // }
         
         let tracker = 0;
 
+        //Starts process for creating a snak if snake does not exist
         if (!this.snake) {
                 this.createSnake();
                 this.moveSnake();   
         }
 
-     
+        //when to destroy the snake's bolt based on x position (left screen)
         if (this.snakeBoltObject) {
             
             if (this.snakeBoltObject.x < 0) {
@@ -284,6 +245,8 @@ class PlayScene extends Phaser.Scene {
             
         }
 
+        //Tracks how many snakebolts. If snakeBoltTracker = 0, snake bolt creation
+        //is enacted
         if (!this.snakeBoltObject) {
             this.snakeBoltTracker = 0;
         }
@@ -294,559 +257,111 @@ class PlayScene extends Phaser.Scene {
             this.snakeBolt = this.createSnakeBolt();
         }
         
+        //functionality for timer
         if (this.stopTimerEnd == false) {
             this.getElapsedTime();
         }
-     
-    }
 
-
-    //old is below// 
-
-    //****************TIMER*******************//
-
-    gameTimer() {
-       this.timerVariable = this.time.addEvent({delay: 90000, callback: this.endGameUsingTimer, callbackScope: this, loop: false})   
-    }
-
-    getElapsedTime() {
-
-            if (this.printTime) {
-                this.printTime.destroy();
-            }
-        
-        var elapsed = this.timerVariable.getElapsedSeconds()
-       // console.log(elapsed);
-
-        let timePrint = null;
-
-        if (elapsed < 10) {
-            timePrint = elapsed.toString().substr(0, 1)
-        } else {
-            timePrint = elapsed.toString().substr(0, 2)
+        //functionality for mute button 
+        if (this.destroyMuteButton == true) {
+            this.muteButton.destroy();
+            this.destroyMuteButton = false;
+            this.setMusic();
+            this.activateMuteButton();
         }
 
-        let totalTime = 90;
-        timePrint = totalTime - timePrint;
+        if (this.electricball) {
+            if (this.lastChildXPosition(this.electricGroup.getChildren()) 
+                < 100) 
+            {   
+                this.itemFactory(this.damageWaveKey());
+            }
+          
+        }
 
-        this.printTime = this.add.text(570, 95, 'time:' + timePrint, { fill: '#000000', fontSize: '35px'}).setOrigin(0,0);
+        if (this.electricball) {
+            if (this.damageGroup.getChildren()[0].x < -600) {
+                this.destroyFireElectricBalls();
+            };
+        }
+
+        // if (this.electricball) {
+        //     if (this.lastChildXPosition(this.electricGroup.getChildren()) 
+        //         < 500) 
+        //     {
+        //         console.log('*Destroy damage items*');
+        //         this.destroyFireElectricBalls();
+        //     }
+        // }
+
         
     }
 
-    endGameUsingTimer() {
-        this.physics.pause();
-        this.endScreen();
+    destroyFireElectricBalls() {
+        
+        this.damageGroup.clear(true);
+        this.electricGroup.clear(true);
+        
+
+    }
+
+    //sets the amounts and frequency of spawning
+    damageWaveKey() {
+        
+        let key = {
+            fire: true, //will be param
+            electricOne: true, //will be param
+            electricTwo: true,  //will be param
+            frequency: 1    //will be param 
+        }
+
+        return key;
+    }
+
+    //create fireballs and electricballs based on keys
+    itemFactory(key) {
+        
+        let originalPosition = 1400;
+
+        for (let i = 0; i < key.frequency; i++) {
+            if (key.fire == true) {
+                this.fireball = this.damageGroup.create(originalPosition, 300, 'newFireBall').play('fireBallAnimation');
+                this.fireball.setScale(.9);
+                this.fireball.setVelocityX(-350);
+            } 
     
+            if (key.electricOne == true) {
+                this.electricball = this.electricGroup.create(originalPosition + 200, 150, 'newElectricBall').play('electricBallAnimation');
+                this.electricball.setScale(.6);
+                this.electricball.setVelocityX(-350);
+            }
+    
+            if (key.electricTwo == true) {
+                if (key.electricOne == true) {
+                    this.electricball = this.electricGroup.create(originalPosition + 400, 650, 'newElectricBall').play('electricBallAnimation');
+                    this.electricball.setScale(.6); 
+                    this.electricball.setVelocityX(-350);
+                }
+            }
+
+            originalPosition += 1000;
+        }
+
+        //logging objects printed from factory
+        console.log(`Item Factory printed 
+        ${this.damageGroup.getChildren().length + 
+            this.electricGroup.getChildren().length} objects`);
+    }
+
+    //get x position of last child in list passed
+
+    lastChildXPosition(localList) {
+        console.log(localList);
+        return localList[localList.length - 1].x;    
     }
 
 
     //*********************after update**************************//
-    
-    //Game Functions for Phaser function "create"
-    createPlayer() {
-
-        this.player = this.physics.add.sprite(100, 250, 'playerVersion2');
-        this.player.setFrame(1);
-        this.player.setScale(.60);
-        this.player.setCollideWorldBounds(true);
-        this.player.body.setSize(180,65);
-        this.player.body.x += 20;
-        this.player.body.setOffset(60, 70);
-    }
-
-    playerDeath() {
-        
-    }
-
-    createBackground() {
-        this.background = this.add.tileSprite(1250, 340, 3000, 422, 'gameBackground');
-        this.background.setScale(2);
-
-        
-
-        this.sun = this.add.tileSprite(1422, 388, 3000, 422, 'gameBackground');
-        this.sun.setScale(1.7);
-    
-
-        this.background = this.add.tileSprite(250, 550, 2540, 352, 'backgroundBuildings');
-        this.background.setScale(1);
-        this.background.setAlpha(1);
-
-        this.brightness = this.add.tileSprite(1250, 360, 2540, 720, 'brightness');
-        this.brightness.setAlpha(0.6);
-        
-        this.foreground_3 = this.add.tileSprite(950, 545, 2540, 352, 'foreground_3');
-        this.foreground_3.setScale(1);
-
-        this.foreground_2 = this.add.tileSprite(1250, 545, 2540, 352, 'foreground_2');
-        this.foreground_2.setScale(1);
-        
-    
-        
-        this.foreground = this.add.tileSprite(750, 488, 2500, 720, 'foreground');
-        this.foreground.setScale(.65);
-        this.clouds = this.add.tileSprite(1250, 360, 2540, 720, 'clouds');
-    }
-
-    //------------------------------Fire and Electric Ball and Damage Group ---------------------------//
-    createFireAndElectricBall() {
-        this.damageGroup = this.physics.add.group();
-        this.electricGroup = this.physics.add.group();
-
-        this.damageItemDistance = 1000;
-
-        for (let i = 0; i < 50; i++) {
-
-            this.damageItemDistance += 400;
-            this.damageItemHeight = Math.random() * (600 - 50) + 50;
-            
-            this.newFireBall = {
-                key: 'fireBallAnimation',
-                frames: this.anims.generateFrameNumbers('newFireBall', {start: 0, end: 5, first: 0}),
-                frameRate: 5,
-                repeat: -1
-            }
-    
-            this.anims.create(this.newFireBall);
-           
-
-            this.fireball = this.damageGroup.create(this.damageItemDistance, this.damageItemHeight, 'newFireBall').play('fireBallAnimation');
-            this.fireball.setScale(.9);
-
-            //set collision box
-            this.fireball.body.setSize(60,60);
-            this.fireball.body.setOffset(25, 50);
-            this.fireBallCount += 1;
-
-            this.damageItemDistance += 200;
-            this.damageItemHeight = Math.random() * (600 - 50) + 50;
-
-            this.newElectricBall = {
-                key: 'electricBallAnimation',
-                frames: this.anims.generateFrameNumbers('newElectricBall', {start:0, end:8, first:0}),
-                frameRate: 6,
-                repeat: -1
-            }
-
-            this.anims.create(this.newElectricBall);
-
-            this.electricball = this.electricGroup.create(this.damageItemDistance, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
-            this.electricball.setScale(.6);
-            this.createElectricballMovement(this.electricball.y);
-
-
-
-            //set collision box
-            this.electricball.body.setSize(100,100);
-
-            this.damageItemDistance += 200;
-            this.damageItemHeight = Math.random() * (600 - 50) + 50;
-            this.electricball = this.electricGroup.create(this.damageItemDistance, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
-            this.electricball.setScale(.6);
-            this.createElectricballMovement(this.electricball.y);
-
-            //set collision box
-            this.electricball.body.setSize(100,100);
-        }
-
-        this.damageGroup.setVelocityX(-350);
-        this.electricGroup.setVelocityX(-350);
-        
-    }
-
-    createElectricballMovement() {
-
-        if (this.electricball.y > 600) {
-            this.electricball.setVelocityY(200);
-        } else {
-            this.electricball.setVelocityY(-200);
-        }
-        
-    }
-
-    checkElectricBallPositionAndMove() {
-
-        for (let i = 0; i < this.electricGroup.getChildren().length; i++) {
-           
-                if (this.electricGroup.getChildren()[i].y < 55) {
-                    this.electricGroup.getChildren()[i].setVelocityY(200);
-                } 
-        
-                if (this.electricGroup.getChildren()[i].y > 680) {
-                    this.electricGroup.getChildren()[i].setVelocityY(-200);
-                }
-        }
-    }
-
-    createDamageCollider() {
-        
-        this.damageCollider = this.physics.add.collider(this.player, this.damageGroup, () => {
-            
-                // console.log('add pause');
-                this.player.setGravityY(300);
-
-                this.physics.pause();
-                this.time.addEvent({
-                    delay: 500,
-                    callback: ()=>{
-                        this.endScreen();
-                    
-                    },
-                    loop: false
-                })
-                    
-        });
-        
-        this.healthCollider = this.physics.add.overlap(this.player, this.damageGroup, this.changeArmorFalse, null, this);
-
-        this.damageCollider.active = true;
-        this.healthCollider.active = false; 
-    }
-
-    changeArmorFalse() {
-        //console.log('take away armor');
-        this.armorCollected = false;
-        //console.log(this.armorCollected);
-        this.player.setAlpha(0.5);
-
-        this.time.addEvent({
-            delay: 300,
-            callback: ()=>{
-                this.player.setAlpha(1);
-            },
-            loop: false
-        })
-
-        this.time.addEvent({
-            delay: 600,
-            callback: ()=>{
-                this.player.setAlpha(.5);
-            },
-            loop: false
-        })
-
-        this.time.addEvent({
-            delay: 900,
-            callback: ()=>{
-                this.player.setAlpha(1);
-            },
-            loop: false
-        })
-
-        this.time.addEvent({
-            delay: 1200,
-            callback: ()=>{
-                this.player.setAlpha(.5);
-            },
-            loop: false
-        })
-
-        this.time.addEvent({
-            delay: 1500,
-            callback: ()=>{
-                this.damageCollider.active = true;
-                this.healthCollider.active = false;
-                this.damageCollider2.active = true;
-                this.healthCollider2.active = false;
-                this.player.setAlpha(1);
-            },
-            loop: false
-        })
-    }
-
-    createElectricCollider() {
-        this.damageCollider2 = this.physics.add.collider(this.player, this.electricGroup, () => {
-            this.player.setGravityY(300);
-            //console.log('add pause');
-            this.physics.pause();
-            this.time.addEvent({
-                delay: 500,
-                callback: ()=>{
-                    
-                    this.endScreen();
-                    
-                },
-                loop: false
-            })
-                
-        });
-    
-    this.healthCollider2 = this.physics.add.overlap(this.player, this.electricGroup, this.changeArmorFalse, null, this);
-
-    this.damageCollider2.active = true;
-    this.healthCollider2.active = false; 
-    }
-
-
-    //-----------------------------Coins and collecting-------------------------//
-    createCoins() {
-        this.collectGroup = this.physics.add.group();
-
-        this.collectItemDistance = 800;
-
-        for (let i = 0; i < 50; i++) {
-
-            this.newCoins = {
-                key: 'coinAnimation',
-                frames: this.anims.generateFrameNumbers('coinAnimated', {start: 0, end: 4, first: 0}),
-                frameRate: 4,
-                repeat: -1
-            }
-    
-            this.anims.create(this.newCoins);
-           
-
-            
-
-            this.collectItemHeight = Math.random() * (600 - 50) + 50;
-            this.collectItemDistance += 800;
-            this.coins = this.collectGroup.create(this.collectItemDistance, this.collectItemHeight, 'newCoins').play('coinAnimation');
-            this.coins.setScale(.5);
-            // this.coins = this.collectGroup.create(this.collectItemDistance, this.collectItemHeight, 'coins');
-            // this.coins.setScale(.3);
-
-            // //set collision box
-            this.coins.body.setSize(75,75);
-        }
-
-        this.collectGroup.setVelocityX(-350);
-    }
-
-    createCollectOverlap() {
-        this.physics.add.overlap(this.player, this.collectGroup, this.collectCoin, null, this);
-    }
-
-    collectCoin(player, collectGroup) {
-        collectGroup.disableBody(true, true);
-        collectGroup.destroy();
-        this.score += 1;
-        this.scoreText.setText(this.score);
-
-        if (this.score >= 10) {
-            this.scoreText.x = this.screenCenterX - 8;
-        }
-
-        this.goldCollectSound.play();
-    }
-
-    //-------------------------------Create armor and collect--------------------------------//
-
-    createArmor() {
-        this.collectArmorGroup = this.physics.add.group();
-
-        this.collectArmorDistance = 1500;
-
-        for (let i = 0; i < 2; i++) {
-            this.collectArmorHeight = Math.random() * (600 - 50) + 50;
-            this.armor = this.collectArmorGroup.create(this.collectArmorDistance, this.collectArmorHeight, 'armor');
-            this.collectArmorDistance += 15000;
-            this.armor.setScale(.3);
-        
-            //set collision box
-            this.armor.body.setSize(200,200);
-        }
-        this.collectArmorGroup.setVelocityX(-350);
-    }
-
-    createCollectArmorOverlap() {
-        this.physics.add.overlap(this.player, this.collectArmorGroup, this.collectArmor, null, this);
-    }
-
-    collectArmor(player, collectArmorGroup) {
-        collectArmorGroup.disableBody(true,true);
-        this.armorCollected = true;
-        //console.log(this.armorCollected, "- armor collected status");
-        this.armorCollectSound.play();
-        this.damageCollider.active = false;
-        this.healthCollider.active = true;
-        this.damageCollider2.active = false;
-        this.healthCollider2.active = true;
-    }
-
-    //Cursors
-    createCursorAndKeyUpKeyDown() {
-        this.cursors = this.input.keyboard.createCursorKeys();
-        this.keyUP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
-        this.keyDOWN = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
-        this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    } 
-
-    
-
-    //---------------------------create only 1 horeth ball---------------------------//
-    createHorethBall() {
-
-        if (this.horethBallReady == true) {
-            this.playerDamageGroup = this.physics.add.group();
-
-            //console.log(this.currentHorethBallNumber, this.maxHorethBall);
-            if (this.currentHorethBallNumber < this.maxHorethBall) {
-            this.player.setFrame(2);
-            this.horethBall = this.playerDamageGroup.create(this.player.x + 20, this.player.y, 'horethBall');
-            this.horethBall.setScale(.3);
-            this.playerDamageGroup.setVelocityX(900); 
-            this.currentHorethBallNumber += 1;
-            this.orbSound.play();
-        
-            if (this.snake) {
-            console.log(this.playerDamageGroup, 'and', this.enemyGroup, "line");
-            this.physics.add.overlap(this.playerDamageGroup, this.enemyGroup, this.destroySnake, null, this);
-            }
-        }
-        
-    } 
-
-        
-
-    //  this.physics.add.collider(this.enemyGroup, this.playerDamageGroup, function() {
-    //      console.log(this.playerDamageGroup);
-    //      console.log(this.enemyGroup);
-    // });
-    
-    }
-
-    removeHorethBall() {
-    //console.log('removeHorethBall');
-    //console.log(this.maxHorethBall);
-
-        if (this.horethBall.x > 1300 && this.horethBall.active) {
-            this.horethBall.destroy();
-            this.currentHorethBallNumber -= 1;
-            //console.log('hey');
-        } 
-    }
-
-
-    //---------------------Snake functionality------------------------//
-    //1 
-
-
-    createSnake() {
-        this.enemyGroup = this.physics.add.group();
-
-        //if (this.snakeDistance == null) {
-            this.snakeDistance = 1380;
-       // } 
-        
-
-        //for (let i = 0; i <= 5; i++) {
-            
-            
-            this.snake = {
-                key: 'snakeVersion2',
-                frames: this.anims.generateFrameNumbers('snake', {start: 0, end: 3, first: 0}),
-                frameRate: 2,
-                repeat: -1
-            }
-            
-            this.anims.create(this.snake);
-            
-            this.snake = this.enemyGroup.create(this.snakeDistance, 300, 'snake').play('snakeVersion2');;
-            
-            this.snake.setScale(.8);
-            this.snake.setSize(280,75);
-            
-           // this.snake.body.setSize(150,70);
-            this.snakeDistance += 100;
-            this.snakeTracker += 1;
-            
-            
-        //}
-        
-        this.enemyGroup.setVelocityY(20);
-    }
-
-    destroySnake(playerDamage, enemy) {
-        enemy.disableBody(true, true);
-        playerDamage.disableBody(true, true);
-        
-        this.bluntImpactSound.play();
-        //this.goldCollectSound.play();
-
-        //Horethball also destroyed
-        playerDamage.disableBody(true, true);
-        this.currentHorethBallNumber -= 1;
-        this.snakeTracker -= 1;
-
-        this.score += 1;
-        
-        this.scoreText.setText(this.score);
-        if (this.score >= 10) {
-            this.scoreText.x = this.screenCenterX - 8;
-        }
-
-        
-        this.time.addEvent({
-            delay: 15500,
-            callback: ()=>{
-                this.snake = false;
-            },
-            loop: false
-        })
-        
-        
-    }
-
-    createSnakeBolt() {
-        this.snakeBoltTracker += 1;
-        
-        this.snakeBolt = {
-            key: 'snakeBoltAnimation',
-            frames: this.anims.generateFrameNumbers('snakeBolt', {start:0, end:2, first:0}),
-            frameRate: 2,
-            repeat: -1
-        }
-
-       
-        this.anims.create(this.snakeBolt);
-       
-        this.snakeBoltObject = this.damageGroup.create(this.snake.x - 180, this.snake.y, 'snakeBolt').play('snakeBoltAnimation');
-        this.snakeBoltObject.setScale(.5);
-        this.snakeBoltObject.setSize(140,30);
-        this.snakeBoltObject.setVelocityX(-400);
-        
-        
-        
-        
-    }
-
-    destroySnakeBolt() {
-        this.snakeBoltObject.destroy();
-        this.snakeBoltTracker = 0;
-    }
-
-    bluntImpactTrigger() {
-    
-        this.bluntImpactSound.play();
-    }
-
-
-    moveSnake() {
-        this.enemyGroup.setVelocityX(-300);
-    } 
-
-    checkAndStopSnake() {
-        //console.log(this.snake.y);
-        
-        if (this.snake.x < 1100) {
-            this.snake.setVelocityX(0);
-        }
-
-        if (this.snake.x == 1100) {
-            this.snake.setVelocityY(100);
-        }
-
-        if (this.snake.y > 550) {
-            this.snake.setVelocityY(-100);
-        }
-
-        if (this.snake.y < 100) {
-            this.snake.setVelocityY(100);
-        }
-        
-    }
-
-
     //Game Function for Phaser function "update"
     setControls() {
         const {left, right} = this.cursors;
@@ -856,6 +371,7 @@ class PlayScene extends Phaser.Scene {
         if (left.isDown) {
             this.player.setVelocityX(-295);
             velocityStopper = true;
+        
 
         if (this.armorCollected == false) {
             this.player.setFrame(3);   
@@ -924,14 +440,584 @@ class PlayScene extends Phaser.Scene {
         }
     }
 
+    //Cursor Creation
+    createCursorAndKeyUpKeyDown() {
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.keyUP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+        this.keyDOWN = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+        this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    } 
+
+    //**************Start music and mute music*******************
+    addMusicButton() {
+
+        if (this.mute == false) {
+            this.muteButton = this.add.image(1255,78, 'unmute');
+        } else {
+            this.muteButton = this.add.image(1255, 78, 'mute');
+        }
+
+    }
+
+    //create mute button event. When destroyMuteButton is set true, update() 
+    //destoys mute button, calls again to set another mute button
+    activateMuteButton() {
+        
+        let currentScene = this;
+        this.muteButton.setInteractive();
+        this.muteButton.on('pointerup', function() {
+            currentScene.destroyMuteButton = true;
+        }); 
+        
+    }
+
+    setMusic() {
+        if (this.mute == false) {
+            this.mute = true;
+        } else {
+            this.mute = false;
+        }
+
+        if (this.mute == false) {
+            this.muteButton = this.add.image(1255,78, 'unmute');
+
+            //set for either playing scene or endscreen
+            if (this.endScreenUp == true) {
+                this.endMusic.play();
+            } else {
+                this.music.play();
+            }
+            
+        } else {
+            this.muteButton = this.add.image(1255, 78, 'mute');
+            
+            //stop music for either playing scene or endscreen
+            if (this.endScreenUp == true) {
+                this.endMusic.stop();
+            } else {
+                this.music.stop();
+            }
+        } 
+
+    }
+
+    //****************TIMER*******************//
+    gameTimer() {
+       this.timerVariable = this.time.addEvent({delay: 90000, callback: this.endGameUsingTimer, callbackScope: this, loop: false})   
+    }
+
+    getElapsedTime() {
+
+        if (this.printTime) {
+             this.printTime.destroy();
+        }
+        
+        var elapsed = this.timerVariable.getElapsedSeconds();
+       
+
+        let timePrint = null;
+
+        if (elapsed < 10) {
+            timePrint = elapsed.toString().substr(0, 1)
+        } else {
+            timePrint = elapsed.toString().substr(0, 2)
+        }
+
+        let totalTime = 90;
+        timePrint = totalTime - timePrint;
+
+        this.printTime = this.add.text(570, 95, 'time:' + timePrint, { fill: '#000000', fontSize: '35px'}).setOrigin(0,0);
+    }
+
+    endGameUsingTimer() {
+        this.physics.pause();
+        this.endScreen();
+    }
+    
+    createPlayer() {
+        this.player = this.physics.add.sprite(100, 250, 'playerVersion2');
+        this.player.setFrame(1);
+        this.player.setScale(.60);
+        this.player.setCollideWorldBounds(true);
+        this.player.body.setSize(180,65);
+        this.player.body.x += 20;
+        this.player.body.setOffset(60, 70);
+    }
+
+    createBackground() {
+        this.background = this.add.tileSprite(1250, 340, 3000, 422, 'gameBackground');
+        this.background.setScale(2);
+
+        this.sun = this.add.tileSprite(1422, 388, 3000, 422, 'gameBackground');
+        this.sun.setScale(1.7);
+
+        this.background = this.add.tileSprite(250, 550, 2540, 352, 'backgroundBuildings');
+        this.background.setScale(1);
+        this.background.setAlpha(1);
+
+        this.brightness = this.add.tileSprite(1250, 360, 2540, 720, 'brightness');
+        this.brightness.setAlpha(0.6);
+        
+        this.foreground_3 = this.add.tileSprite(950, 545, 2540, 352, 'foreground_3');
+        this.foreground_3.setScale(1);
+
+        this.foreground_2 = this.add.tileSprite(1250, 545, 2540, 352, 'foreground_2');
+        this.foreground_2.setScale(1);
+        
+        this.foreground = this.add.tileSprite(750, 488, 2500, 720, 'foreground');
+        this.foreground.setScale(.65);
+        this.clouds = this.add.tileSprite(1250, 360, 2540, 720, 'clouds');
+    }
+
+    createGroups() {
+        this.damageGroup = this.physics.add.group();
+        this.electricGroup = this.physics.add.group();
+    }
+
+    createFireAndElectricAnimation() {
+        //creating animations for each fireball and electriball
+        this.newFireBall = {
+            key: 'fireBallAnimation',
+            frames: this.anims.generateFrameNumbers('newFireBall', {start: 0, end: 5, first: 0}),
+            frameRate: 5,
+            repeat: -1
+        }
+
+        this.anims.create(this.newFireBall);
+
+        this.newElectricBall = {
+            key: 'electricBallAnimation',
+            frames: this.anims.generateFrameNumbers('newElectricBall', {start:0, end:8, first:0}),
+            frameRate: 6,
+            repeat: -1
+        }
+
+        this.anims.create(this.newElectricBall);
+    }
+
+    //------------------------------Fire and Electric Ball and Damage Group ---------------------------//
+    // createFireAndElectricBall() {
+    //     this.damageGroup = this.physics.add.group();
+    //     this.electricGroup = this.physics.add.group();
+
+    //     this.damageItemDistance = 1000;
+        
+    //     //crating animations for each fireball and electriball
+    //     this.newFireBall = {
+    //         key: 'fireBallAnimation',
+    //         frames: this.anims.generateFrameNumbers('newFireBall', {start: 0, end: 5, first: 0}),
+    //         frameRate: 5,
+    //         repeat: -1
+    //     }
+
+    //     this.anims.create(this.newFireBall);
+
+    //     this.newElectricBall = {
+    //         key: 'electricBallAnimation',
+    //         frames: this.anims.generateFrameNumbers('newElectricBall', {start:0, end:8, first:0}),
+    //         frameRate: 6,
+    //         repeat: -1
+    //     }
+
+    //     this.anims.create(this.newElectricBall);
+
+    //     //creates all the fireballs/electricballs, position, scale, collision box
+    //     for (let i = 0; i < 50; i++) {
+
+    //         this.damageItemDistance += 400;
+    //         this.damageItemHeight = Math.random() * (600 - 50) + 50;   
+
+    //         this.fireball = this.damageGroup.create(this.damageItemDistance, this.damageItemHeight, 'newFireBall').play('fireBallAnimation');
+    //         this.fireball.setScale(.9);
+
+    //         //set collision box
+    //         this.fireball.body.setSize(60,60);
+    //         this.fireball.body.setOffset(25, 50);
+    //         this.fireBallCount += 1;
+
+    //         this.damageItemDistance += 200;
+    //         this.damageItemHeight = Math.random() * (600 - 50) + 50;
+
+    //         this.electricball = this.electricGroup.create(this.damageItemDistance, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
+    //         this.electricball.setScale(.6);
+    //         this.createElectricballMovement(this.electricball.y);
+
+    //         //set collision box
+    //         this.electricball.body.setSize(100,100);
+
+    //         this.damageItemDistance += 200;
+    //         this.damageItemHeight = Math.random() * (600 - 50) + 50;
+    //         this.electricball = this.electricGroup.create(this.damageItemDistance, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
+    //         this.electricball.setScale(.6);
+    //         this.createElectricballMovement(this.electricball.y);
+
+    //         //set collision box
+    //         this.electricball.body.setSize(100,100);
+    //     }
+
+    //     //sets the velocity after all have electric/fire balls have been created
+    //     this.damageGroup.setVelocityX(-350);
+    //     this.electricGroup.setVelocityX(-350);
+        
+    // }
+
+    // //up and down movement
+    // createElectricballMovement() {
+
+    //     if (this.electricball.y > 600) {
+    //         this.electricball.setVelocityY(200);
+    //     } else {
+    //         this.electricball.setVelocityY(-200);
+    //     }
+        
+    // }
+
+    // //Unsure why this works at the moment, but without the electricballs don't appear
+    // checkElectricBallPositionAndMove() {
+
+    //     for (let i = 0; i < this.electricGroup.getChildren().length; i++) {
+           
+    //             if (this.electricGroup.getChildren()[i].y < 55) {
+    //                 this.electricGroup.getChildren()[i].setVelocityY(200);
+    //             } 
+        
+    //             if (this.electricGroup.getChildren()[i].y > 680) {
+    //                 this.electricGroup.getChildren()[i].setVelocityY(-200);
+    //             }
+    //     }
+    // }
+    //-------------------- Colliders ---------------------//
+
+    //Create both collider for player death and removing armor upon collision
+    //Set damage (death) collider true, health collider false
+    //Health collider is only used for armor
+    // createDamageCollider() {
+    //     this.damageCollider = this.physics.add.collider(this.player, this.damageGroup, () => {
+    
+    //             this.physics.pause();
+    //             this.time.addEvent({
+    //                 delay: 500,
+    //                 callback: ()=>{
+    //                     this.endScreen();
+    //                 },
+    //                 loop: false
+    //             }) 
+    //     });
+        
+    //     this.healthCollider = this.physics.add.overlap(this.player, this.damageGroup, this.changeArmorFalse, null, this);
+
+    //     this.damageCollider.active = true;
+    //     this.healthCollider.active = false; 
+    // }
+
+    //Armor is removed, play blinks opacity, resets to damage collider
+    // changeArmorFalse() {
+    //     this.armorCollected = false;
+    //     this.player.setAlpha(0.5);
+
+    //     this.time.addEvent({
+    //         delay: 300,
+    //         callback: ()=>{
+    //             this.player.setAlpha(1);
+    //         },
+    //         loop: false
+    //     })
+
+    //     this.time.addEvent({
+    //         delay: 600,
+    //         callback: ()=>{
+    //             this.player.setAlpha(.5);
+    //         },
+    //         loop: false
+    //     })
+
+    //     this.time.addEvent({
+    //         delay: 900,
+    //         callback: ()=>{
+    //             this.player.setAlpha(1);
+    //         },
+    //         loop: false
+    //     })
+
+    //     this.time.addEvent({
+    //         delay: 1200,
+    //         callback: ()=>{
+    //             this.player.setAlpha(.5);
+    //         },
+    //         loop: false
+    //     })
+
+    //     this.time.addEvent({
+    //         delay: 1500,
+    //         callback: ()=>{
+    //             this.damageCollider.active = true;
+    //             this.healthCollider.active = false;
+    //             this.damageCollider2.active = true;
+    //             this.healthCollider2.active = false;
+    //             this.player.setAlpha(1);
+    //         },
+    //         loop: false
+    //     })
+    // }
+
+    //Sets the same collider as damage but for electric balls specifically
+    //Set damage (death) collider true, health collider false
+    //Health collider is only used for armor
+    // createElectricCollider() {
+    //     this.damageCollider2 = this.physics.add.collider(this.player, this.electricGroup, () => {
+    //         this.player.setGravityY(300);
+    //         //console.log('add pause');
+    //         this.physics.pause();
+    //         this.time.addEvent({
+    //             delay: 500,
+    //             callback: ()=>{
+                    
+    //                 this.endScreen();
+                    
+    //             },
+    //             loop: false
+    //         })
+                
+    //     });
+    
+    // this.healthCollider2 = this.physics.add.overlap(this.player, this.electricGroup, this.changeArmorFalse, null, this);
+
+    // this.damageCollider2.active = true;
+    // this.healthCollider2.active = false; 
+    // }
+
+    //-----------------------------Coins and collecting-------------------------//
+    createCoins() {
+        this.collectGroup = this.physics.add.group();
+
+        this.collectItemDistance = 1000;
+
+        for (let i = 0; i < 50; i++) {
+
+            this.newCoins = {
+                key: 'coinAnimation',
+                frames: this.anims.generateFrameNumbers('coinAnimated', {start: 0, end: 4, first: 0}),
+                frameRate: 4,
+                repeat: -1
+            }
+    
+            this.anims.create(this.newCoins);
+           
+            this.collectItemHeight = Math.random() * (600 - 50) + 50;
+            this.collectItemDistance += 800;
+            this.coins = this.collectGroup.create(this.collectItemDistance, this.collectItemHeight, 'newCoins').play('coinAnimation');
+            this.coins.setScale(.5);
+
+            //set collision box
+            this.coins.body.setSize(75,75);
+        }
+
+        this.collectGroup.setVelocityX(-350);
+    }
+
+    //coin collider
+    createCollectOverlap() {
+        this.physics.add.overlap(this.player, this.collectGroup, this.collectCoin, null, this);
+    }
+
+    collectCoin(player, collectGroup) {
+        collectGroup.disableBody(true, true);
+        collectGroup.destroy();
+        this.score += 1;
+        this.scoreText.setText(this.score);
+
+        if (this.score >= 10) {
+            this.scoreText.x = this.screenCenterX - 8;
+        }
+
+        this.goldCollectSound.play();
+    }
+
+    //-------------------------------Create armor and collect--------------------------------//
+
+    // createArmor() {
+    //     this.collectArmorGroup = this.physics.add.group();
+
+    //     this.collectArmorDistance = 1500;
+
+    //     for (let i = 0; i < 2; i++) {
+    //         this.collectArmorHeight = Math.random() * (600 - 50) + 50;
+    //         this.armor = this.collectArmorGroup.create(this.collectArmorDistance, this.collectArmorHeight, 'armor');
+    //         this.collectArmorDistance += 15000;
+    //         this.armor.setScale(.3);
+        
+    //         //set collision box
+    //         this.armor.body.setSize(200,200);
+    //     }
+    //     this.collectArmorGroup.setVelocityX(-350);
+    // }
+
+    //armor collider
+    // createCollectArmorOverlap() {
+    //     this.physics.add.overlap(this.player, this.collectArmorGroup, this.collectArmor, null, this);
+    // }
+
+    // collectArmor(player, collectArmorGroup) {
+    //     collectArmorGroup.disableBody(true,true);
+
+    //     //reset colliders for state
+    //     this.armorCollected = true;
+    //     this.armorCollectSound.play();
+    //     this.damageCollider.active = false;
+    //     this.healthCollider.active = true;
+    //     this.damageCollider2.active = false;
+    //     this.healthCollider2.active = true;
+    // }
+
+    //---------------------------create only 1 horeth ball---------------------------//
+    createHorethBall() {
+
+            if (this.horethBallReady == true) {
+                this.playerDamageGroup = this.physics.add.group();
+
+                if (this.currentHorethBallNumber < this.maxHorethBall) {
+                this.player.setFrame(2);
+                this.horethBall = this.playerDamageGroup.create(this.player.x + 20, this.player.y, 'horethBall');
+                this.horethBall.setScale(.3);
+                this.playerDamageGroup.setVelocityX(900); 
+                this.currentHorethBallNumber += 1;
+                this.orbSound.play();
+            
+                if (this.snake) {
+                // console.log(this.playerDamageGroup, 'and', this.enemyGroup, "line");
+                this.physics.add.overlap(this.playerDamageGroup, this.enemyGroup, this.destroySnake, null, this);
+                }
+            }
+            
+        } 
+    
+    }
+
+    removeHorethBall() {
+        if (this.horethBall.x > 1300 && this.horethBall.active) {
+            this.horethBall.destroy();
+            this.currentHorethBallNumber -= 1;
+        } 
+    }
+
+    //---------------------Snake functionality------------------------//
+    //1 
+
+    createSnake() {
+        this.enemyGroup = this.physics.add.group();
+
+        this.snakeDistance = 1380;
+            
+        this.snake = {
+            key: 'snakeVersion2',
+            frames: this.anims.generateFrameNumbers('snake', {start: 0, end: 3, first: 0}),
+            frameRate: 2,
+            repeat: -1
+        }
+            
+        this.anims.create(this.snake);
+            
+        this.snake = this.enemyGroup.create(this.snakeDistance, 300, 'snake').play('snakeVersion2');;
+        this.snake.setScale(.8);
+        this.snake.setSize(280,75);
+            
+        this.snakeDistance += 100;
+        this.snakeTracker += 1;
+            
+        this.enemyGroup.setVelocityY(20);
+    }
+
+    destroySnake(playerDamage, enemy) {
+        enemy.disableBody(true, true);
+        playerDamage.disableBody(true, true);
+        
+        this.bluntImpactSound.play();
+        playerDamage.disableBody(true, true);
+        this.currentHorethBallNumber -= 1; //destroys Horethball
+        this.snakeTracker -= 1;
+
+        this.score += 1; //add score
+        
+        this.scoreText.setText(this.score);
+        if (this.score >= 10) {
+            this.scoreText.x = this.screenCenterX - 8;
+        }
+        
+        //wait to set snake to false to start creation of new snake
+        this.time.addEvent({
+            delay: 15500,
+            callback: ()=>{
+                this.snake = false;
+            },
+            loop: false
+        })
+        
+        
+    }
+
+    createSnakeBolt() {
+        this.snakeBoltTracker += 1;
+        
+        this.snakeBolt = {
+            key: 'snakeBoltAnimation',
+            frames: this.anims.generateFrameNumbers('snakeBolt', {start:0, end:2, first:0}),
+            frameRate: 2,
+            repeat: -1
+        }
+
+        this.anims.create(this.snakeBolt);
+       
+        this.snakeBoltObject = this.damageGroup.create(this.snake.x - 180, this.snake.y, 'snakeBolt').play('snakeBoltAnimation');
+        this.snakeBoltObject.setScale(.5);
+        this.snakeBoltObject.setSize(140,30);
+        this.snakeBoltObject.setVelocityX(-400);
+    }
+
+    destroySnakeBolt() {
+        this.snakeBoltObject.destroy();
+        this.snakeBoltTracker = 0;
+    }
+
+    //blunt sound
+    bluntImpactTrigger() {
+        this.bluntImpactSound.play();
+    }
+
+    moveSnake() {
+        this.enemyGroup.setVelocityX(-300);
+    } 
+
+    //up and down
+    checkAndStopSnake() {
+        
+        if (this.snake.x < 1100) {
+            this.snake.setVelocityX(0);
+        }
+
+        if (this.snake.x == 1100) {
+            this.snake.setVelocityY(100);
+        }
+
+        if (this.snake.y > 550) {
+            this.snake.setVelocityY(-100);
+        }
+
+        if (this.snake.y < 100) {
+            this.snake.setVelocityY(100);
+        }
+    }
+
+
     resetVariables() {
         this.snakeTracker = 0;
-        this.move1 = false;
-        this.move2 = false;
     }
+
+    //********************* After Death  ********************/
+    //Includes fetchs to backend to call MongoDB for score data
 
     async endScreen() {
         this.endScreenUp = true;
+
         //so horethball doesn't spawn when typing name
         this.horethBallReady = false;
         
@@ -940,30 +1026,23 @@ class PlayScene extends Phaser.Scene {
             this.printTime.destroy();
         }
 
-          
+        if (this.mute == false) {
+            this.endMusic.play();
+        } else {
+            this.endMusic.stop();
+        }
         
-        //API call to save score, create config in future
-        console.log('fetch in endscreen line 969');
-        
-
+        this.music.stop();        
         this.resetVariables();
-            
         const { width, height } = this.sys.game.canvas;
-        
-
-
-        //*************HISCORE PANEL***************
-
+    
+        //HISCORE PANEL
         let hiScorePanel = this.add.sprite(width/2 - 610, 130, 'hiScorePanel').setOrigin(0,0);
         hiScorePanel.setScale(.8);
 
         let hiScoreArray = [];
 
-        
         this.fetchData();
-        
-        // console.log(g, "g test 2");
-        // console.log('test3')
 
         let widthIncrement = 40;
         let heightIncrement = 15;
@@ -991,8 +1070,6 @@ class PlayScene extends Phaser.Scene {
             .setInteractive()
             .setOrigin(.5, 0)
             .on('pointerdown', () => this.restart(), this);
-
-
 
         //inputbox to submit score 
         let playerName = this.add.dom(618, 405).createFromCache("form")
@@ -1106,10 +1183,8 @@ class PlayScene extends Phaser.Scene {
         this.snake = null;
         this.snakeBoltTracker = 0;
         this.currentHorethBallNumber = 0;
-        this.move1 = false;
-        this.move2 = false;
-        this.move3 = false;
-        this.move4 = false;
+        //this.music.stop();
+        this.endMusic.stop();
         this.wind.stop();
         this.gameTimer();
         this.stopTimerEnd = false;
@@ -1125,12 +1200,8 @@ class PlayScene extends Phaser.Scene {
         }
 
         this.scene.restart();
-
     }
 
 }
-
-
-
 
 export default PlayScene;

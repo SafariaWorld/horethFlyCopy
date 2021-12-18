@@ -71,7 +71,7 @@ class TitleScene extends Phaser.Scene {
 
     update() {
         this.sun.tilePositionX += 0.3;
-        this.foregroundTitle.tilePositionX += 3;
+        this.foregroundTitle.tilePositionX += 2;
         this.cloudsTitle.tilePositionX += 1
     }
 

@@ -277,30 +277,39 @@ class PlayScene extends Phaser.Scene {
             this.activateMuteButton();
         }
 
-        if (this.fireball) {
-            if (this.damageGroup.getChildren().x < 100) {
-                this.fireball.destroy();
-                console.log('fireball destroyed');
-            }
-        }
-        
-        if (this.electricball) {
-            if (this.electricGroup.getChildren().x < 100) {
-                this.electricball.destroy();
-                console.log('electricball destroyed');
-            }
-        }
-
         if (this.electricball) {
             if (this.lastChildXPosition(this.electricGroup.getChildren()) 
-                < 500) 
-            {
+                < 100) 
+            {   
                 this.itemFactory(this.damageWaveKey());
-
             }
+          
         }
+
+        if (this.electricball) {
+            if (this.damageGroup.getChildren()[0].x < -600) {
+                this.destroyFireElectricBalls();
+            };
+        }
+
+        // if (this.electricball) {
+        //     if (this.lastChildXPosition(this.electricGroup.getChildren()) 
+        //         < 500) 
+        //     {
+        //         console.log('*Destroy damage items*');
+        //         this.destroyFireElectricBalls();
+        //     }
+        // }
+
         
-     
+    }
+
+    destroyFireElectricBalls() {
+        
+        this.damageGroup.clear(true);
+        this.electricGroup.clear(true);
+        
+
     }
 
     //sets the amounts and frequency of spawning
@@ -310,7 +319,7 @@ class PlayScene extends Phaser.Scene {
             fire: true, //will be param
             electricOne: true, //will be param
             electricTwo: true,  //will be param
-            frequency: 2    //will be param 
+            frequency: 1    //will be param 
         }
 
         return key;
@@ -319,9 +328,9 @@ class PlayScene extends Phaser.Scene {
     //create fireballs and electricballs based on keys
     itemFactory(key) {
         
-        let originalPosition = 1600;
+        let originalPosition = 1400;
 
-        for (let i = 0; i <= key.frequency; i++) {
+        for (let i = 0; i < key.frequency; i++) {
             if (key.fire == true) {
                 this.fireball = this.damageGroup.create(originalPosition, 300, 'newFireBall').play('fireBallAnimation');
                 this.fireball.setScale(.9);
@@ -337,7 +346,7 @@ class PlayScene extends Phaser.Scene {
             if (key.electricTwo == true) {
                 if (key.electricOne == true) {
                     this.electricball = this.electricGroup.create(originalPosition + 400, 650, 'newElectricBall').play('electricBallAnimation');
-                    this.electricball.setScale(.6);
+                    this.electricball.setScale(.6); 
                     this.electricball.setVelocityX(-350);
                 }
             }
@@ -345,25 +354,21 @@ class PlayScene extends Phaser.Scene {
             originalPosition += 1000;
         }
 
-        //testing children
-        console.log(this.electricGroup.getChildren(), "- when one fails");
+        //logging objects printed from factory
+        console.log(`Item Factory printed 
+        ${this.damageGroup.getChildren().length + 
+            this.electricGroup.getChildren().length} objects`);
     }
 
-    //set damageSpawnTracker to the last child
+    //get x position of last child in list passed
 
-    
     lastChildXPosition(localList) {
-
-
-        return localList[localList.length - 1].x
-
-    
+        console.log(localList);
+        return localList[localList.length - 1].x;    
     }
-
 
 
     //*********************after update**************************//
-
     //Game Function for Phaser function "update"
     setControls() {
         const {left, right} = this.cursors;
@@ -874,23 +879,23 @@ class PlayScene extends Phaser.Scene {
     //---------------------------create only 1 horeth ball---------------------------//
     createHorethBall() {
 
-        if (this.horethBallReady == true) {
-            this.playerDamageGroup = this.physics.add.group();
+            if (this.horethBallReady == true) {
+                this.playerDamageGroup = this.physics.add.group();
 
-            if (this.currentHorethBallNumber < this.maxHorethBall) {
-            this.player.setFrame(2);
-            this.horethBall = this.playerDamageGroup.create(this.player.x + 20, this.player.y, 'horethBall');
-            this.horethBall.setScale(.3);
-            this.playerDamageGroup.setVelocityX(900); 
-            this.currentHorethBallNumber += 1;
-            this.orbSound.play();
-        
-            if (this.snake) {
-           // console.log(this.playerDamageGroup, 'and', this.enemyGroup, "line");
-            this.physics.add.overlap(this.playerDamageGroup, this.enemyGroup, this.destroySnake, null, this);
+                if (this.currentHorethBallNumber < this.maxHorethBall) {
+                this.player.setFrame(2);
+                this.horethBall = this.playerDamageGroup.create(this.player.x + 20, this.player.y, 'horethBall');
+                this.horethBall.setScale(.3);
+                this.playerDamageGroup.setVelocityX(900); 
+                this.currentHorethBallNumber += 1;
+                this.orbSound.play();
+            
+                if (this.snake) {
+                // console.log(this.playerDamageGroup, 'and', this.enemyGroup, "line");
+                this.physics.add.overlap(this.playerDamageGroup, this.enemyGroup, this.destroySnake, null, this);
+                }
             }
-        }
-        
+            
         } 
     
     }

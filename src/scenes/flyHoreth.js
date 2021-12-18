@@ -274,16 +274,17 @@ class PlayScene extends Phaser.Scene {
             if (this.lastChildXPosition(this.electricGroup.getChildren()) 
                 < 100) 
             {   
+                this.destroyFireElectricBalls();
                 this.itemFactory(this.damageWaveKey());
             }
           
         }
 
-        if (this.electricball) {
-            if (this.damageGroup.getChildren()[0].x < -600) {
-                this.destroyFireElectricBalls();
-            };
-        }
+        // if (this.electricball) {
+        //     if (this.damageGroup.getChildren()[0].x < -1000) {
+        //         this.destroyFireElectricBalls();
+        //     };
+        // }
 
         // if (this.electricball) {
         //     if (this.lastChildXPosition(this.electricGroup.getChildren()) 

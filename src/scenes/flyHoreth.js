@@ -30,6 +30,16 @@ class PlayScene extends Phaser.Scene {
 
         //damage group
         this.damageGroup = null;
+        this.electricGroup = null;
+        this.damageGroup2 = null;
+        this.electricGroup2 = null;
+
+        //item factory
+        this.groupOneUp = false;
+        this.groupTwoUp = false;
+        this.keyCounter = 0;
+
+
         this.fireball = null;
         this.electricball = null;
         this.damageItemHeight = null;
@@ -187,7 +197,9 @@ class PlayScene extends Phaser.Scene {
         this.createGroups();
         this.createFireAndElectricAnimation();
 
-        this.itemFactory(this.damageWaveKey());
+        //spawn first group
+        this.spawnGroup1();
+        this.groupOneUp = true;
     }
 
     update() {
@@ -222,13 +234,6 @@ class PlayScene extends Phaser.Scene {
                 this.afterPatrolDiamondMove();
             }
         }
-
-        //Checks electric ball position and sets Y velocity up or down
-        // if (this.electricball) {
-        //     this.checkElectricBallPositionAndMove();
-        // }
-        
-        let tracker = 0;
 
         //Starts process for creating a snak if snake does not exist
         if (!this.snake) {
@@ -270,97 +275,240 @@ class PlayScene extends Phaser.Scene {
             this.activateMuteButton();
         }
 
-        if (this.electricball) {
-            if (this.lastChildXPosition(this.electricGroup.getChildren()) 
-                < 100) 
-            {   
-                this.destroyFireElectricBalls();
-                this.itemFactory(this.damageWaveKey());
+        //******Below are item factory specific updates
+        //fireballs
+        if (this.damageGroup.getChildren().length > 0) {
+            if (this.damageGroup.getChildren()[this.damageGroup.getChildren().length - 1].x < -700) {
+                this.destroyGroup1();
+                this.groupOneUp = false; //switch so only spins up once on destroy
+                
+
+                console.log('*group1 destroyed')
             }
-          
         }
 
-        // if (this.electricball) {
-        //     if (this.damageGroup.getChildren()[0].x < -1000) {
-        //         this.destroyFireElectricBalls();
-        //     };
-        // }
+        //fireballs
+        if (this.damageGroup.getChildren().length > 0) {
+            if (this.damageGroup.getChildren()[this.damageGroup.getChildren().length - 1].x < 200 && this.groupTwoUp == false) {
+                
+                this.spawnGroup2();
+                this.groupTwoUp = true; //switch so only spins up once on destroy
 
-        // if (this.electricball) {
-        //     if (this.lastChildXPosition(this.electricGroup.getChildren()) 
-        //         < 500) 
-        //     {
-        //         console.log('*Destroy damage items*');
-        //         this.destroyFireElectricBalls();
-        //     }
-        // }
 
-        
-    }
-
-    destroyFireElectricBalls() {
-        
-        this.damageGroup.clear(true);
-        this.electricGroup.clear(true);
-        
-
-    }
-
-    //sets the amounts and frequency of spawning
-    damageWaveKey() {
-        
-        let key = {
-            fire: true, //will be param
-            electricOne: true, //will be param
-            electricTwo: true,  //will be param
-            frequency: 1    //will be param 
+                console.log('**group2 spawned')
+            }
         }
 
-        return key;
-    }
-
-    //create fireballs and electricballs based on keys
-    itemFactory(key) {
+        //electricballs
+        if (this.damageGroup2.getChildren().length > 0) {
+            //console.log('g2 start');
+            if (this.damageGroup2.getChildren()[this.damageGroup2.getChildren().length - 1].x < -700) {
+                this.destroyGroup2();
+                this.groupTwoUp = false; //switch so only spins up once on destroy
+            
+                console.log('**group2 destroyed')
+            }
+        }
         
+        //electricballs
+        if (this.damageGroup2.getChildren().length > 0) {
+            //console.log('g2 start');
+            if (this.damageGroup2.getChildren()[this.damageGroup2.getChildren().length - 1].x < 200 && this.groupOneUp == false) {
+                this.spawnGroup1();
+                this.groupOneUp = true; //switch so only spins up once on destroy
+            
+                console.log('*group1 spawned')
+            }
+        }
+        
+        if (this.electricball) {
+            this.checkElectricBallPositionAndMove();
+        }
+    } //update function above
+
+
+
+
+    /****** Item Factory ******/
+    /******  Functions:  ******/
+    /******  1. itemFactory - produces objects. Accepts key */
+    /******  2. keyBank - owns keys. Transfers keys to item Factory. */
+    /******               passed into itemFactory*/
+    /******  3. destroyGroup1 - destroy Group1 via clear*/
+    /******  4. spawnGroup1 -  send call to keyBank to spawn objects*/
+    /******  5. destroyGroup2 - destroy Group2 via clear*/
+    /******  6. spawnGroup2 - send call to keyBank to spawn objects */
+    
+    /****** refer to documentation for more information */
+    
+     itemFactory(key, insertedGroupFire, insertedGroupElectric) {
+
+      
+        console.log('****item factory producing****');
+
         let originalPosition = 1400;
+        
 
+        
         for (let i = 0; i < key.frequency; i++) {
+            this.damageItemHeight = Math.random() * (600 - 50) + 50;
             if (key.fire == true) {
-                this.fireball = this.damageGroup.create(originalPosition, 300, 'newFireBall').play('fireBallAnimation');
+                this.fireball = insertedGroupFire.create(originalPosition, this.damageItemHeight, 'newFireBall').play('fireBallAnimation');
                 this.fireball.setScale(.9);
                 this.fireball.setVelocityX(-350);
-            } 
+            }  
     
+            this.damageItemHeight = Math.random() * (600 - 50) + 50;
             if (key.electricOne == true) {
-                this.electricball = this.electricGroup.create(originalPosition + 200, 150, 'newElectricBall').play('electricBallAnimation');
+                this.electricball = insertedGroupElectric.create(originalPosition + 200, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
                 this.electricball.setScale(.6);
                 this.electricball.setVelocityX(-350);
+                this.createElectricballMovement(this.electricball.y);
             }
     
+            this.damageItemHeight = Math.random() * (600 - 50) + 50;
             if (key.electricTwo == true) {
-                if (key.electricOne == true) {
-                    this.electricball = this.electricGroup.create(originalPosition + 400, 650, 'newElectricBall').play('electricBallAnimation');
+                    this.electricball = insertedGroupElectric.create(originalPosition + 400, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
                     this.electricball.setScale(.6); 
                     this.electricball.setVelocityX(-350);
-                }
+                    this.createElectricballMovement(this.electricball.y);   
             }
 
-            originalPosition += 1000;
+            this.damageItemHeight = Math.random() * (600 - 50) + 50;
+            if (key.fireTwo == true) {
+                this.fireball = insertedGroupFire.create(originalPosition + 600, this.damageItemHeight, 'newFireBall').play('fireBallAnimation');
+                this.fireball.setScale(.9);
+                this.fireball.setVelocityX(-350);
+            }  
+
+            this.damageItemHeight = Math.random() * (600 - 50) + 50;
+            if (key.electricThree == true) {
+                this.electricball = insertedGroupElectric.create(originalPosition + 800, this.damageItemHeight, 'newElectricBall').play('electricBallAnimation');
+                this.electricball.setScale(.6); 
+                this.electricball.setVelocityX(-350);
+                this.createElectricballMovement(this.electricball.y);
+            }
+            originalPosition += 800
         }
 
-        //logging objects printed from factory
-        console.log(`Item Factory printed 
-        ${this.damageGroup.getChildren().length + 
-            this.electricGroup.getChildren().length} objects`);
+        this.createElectricballMovement();
+
+        console.log(this.damageGroup.getChildren(), "-damage group")
+        console.log(this.electricGroup.getChildren(), "-electric group")
+        console.log(this.damageGroup2.getChildren(), "-damage group2")
+        console.log(this.electricGroup2.getChildren(), "-electric group2")
+     }
+
+     destroyGroup1() {
+        console.log('group1 function destroy');
+        this.damageGroup.clear(true);
+        this.electricGroup.clear(true);
     }
 
-    //get x position of last child in list passed
-
-    lastChildXPosition(localList) {
-        console.log(localList);
-        return localList[localList.length - 1].x;    
+    spawnGroup1() {
+        //calling item factory, then passing key bank and group1 set
+        this.itemFactory(this.keyBank(), this.damageGroup, this.electricGroup);
     }
 
+    destroyGroup2() {
+        console.log('group2 function destroy');
+        this.damageGroup2.clear(true);
+        this.electricGroup2.clear(true);
+      
+    }
+
+    spawnGroup2() {
+        //calling item factory, then passing key bank and group2 set
+        this.itemFactory(this.keyBank(), this.damageGroup2, this.electricGroup2);
+    }
+
+    keyBank() {
+        
+        let key = [
+            {
+                fire: true, //will be param
+                electricOne: true, //will be param
+                electricTwo: false,  //will be param
+                fireTwo: false,
+                electricThree: false,
+                frequency: 4    //will be param 
+            },
+            {
+                fire: true, //will be param
+                electricOne: false, //will be param
+                electricTwo: true,
+                fireTwo: false, 
+                electricThree: false, //will be param
+                frequency: 4    //will be param 
+            },
+            {
+                fire: true, //will be param
+                electricOne: false, //will be param
+                electricTwo: true,
+                fireTwo: false,
+                electricThree: true,  //will be param
+                frequency: 4    //will be param 
+            },
+            {
+                fire: true, //will be param
+                electricOne: true, //will be param
+                electricTwo: true,
+                fireTwo: true,
+                electricThree: true,  //will be param
+                frequency: 2    //will be param 
+            }
+    ]
+
+        this.keyCounter += 1;
+        console.log(key[this.keyCounter - 1]);
+
+        if (this.keyCounter >= key.length) {
+            this.keyCounter = key.length;
+        }
+
+        return key[this.keyCounter - 1];
+    }
+
+    //up and down movement
+    createElectricballMovement() {
+
+        if (this.electricball.y > 600) {
+            this.electricball.setVelocityY(200);
+        } else {
+            this.electricball.setVelocityY(-200);
+        }
+        
+    }
+
+    //Unsure why this works at the moment, but without the electricballs don't appear
+    checkElectricBallPositionAndMove() {
+
+        for (let i = 0; i < this.electricGroup.getChildren().length; i++) {
+           
+                if (this.electricGroup.getChildren()[i].y < 55) {
+                    this.electricGroup.getChildren()[i].setVelocityY(200);
+                } 
+        
+                if (this.electricGroup.getChildren()[i].y > 680) {
+                    this.electricGroup.getChildren()[i].setVelocityY(-200);
+                }   
+        }
+
+        for (let i = 0; i < this.electricGroup2.getChildren().length; i++) {
+           
+            if (this.electricGroup2.getChildren()[i].y < 55) {
+                this.electricGroup2.getChildren()[i].setVelocityY(200);
+            } 
+    
+            if (this.electricGroup2.getChildren()[i].y > 680) {
+                this.electricGroup2.getChildren()[i].setVelocityY(-200);
+            }   
+        }
+
+
+    }
+
+    
 
     //*********************after update**************************//
     //Game Function for Phaser function "update"
@@ -504,7 +652,7 @@ class PlayScene extends Phaser.Scene {
 
     //****************TIMER*******************//
     gameTimer() {
-       this.timerVariable = this.time.addEvent({delay: 90000, callback: this.endGameUsingTimer, callbackScope: this, loop: false})   
+       this.timerVariable = this.time.addEvent({delay: 9000000, callback: this.endGameUsingTimer, callbackScope: this, loop: false})   
     }
 
     getElapsedTime() {
@@ -524,7 +672,7 @@ class PlayScene extends Phaser.Scene {
             timePrint = elapsed.toString().substr(0, 2)
         }
 
-        let totalTime = 90;
+        let totalTime = 9000;
         timePrint = totalTime - timePrint;
 
         this.printTime = this.add.text(570, 95, 'time:' + timePrint, { fill: '#000000', fontSize: '35px'}).setOrigin(0,0);
@@ -571,8 +719,14 @@ class PlayScene extends Phaser.Scene {
     }
 
     createGroups() {
+
+        //2 groups per section allows for cycling groups
         this.damageGroup = this.physics.add.group();
         this.electricGroup = this.physics.add.group();
+        this.damageGroup2 = this.physics.add.group();
+        this.electricGroup2 = this.physics.add.group();
+
+        this.snakeBoltGroup = this.physics.add.group();
     }
 
     createFireAndElectricAnimation() {
@@ -662,32 +816,8 @@ class PlayScene extends Phaser.Scene {
         
     // }
 
-    // //up and down movement
-    // createElectricballMovement() {
-
-    //     if (this.electricball.y > 600) {
-    //         this.electricball.setVelocityY(200);
-    //     } else {
-    //         this.electricball.setVelocityY(-200);
-    //     }
-        
-    // }
-
-    // //Unsure why this works at the moment, but without the electricballs don't appear
-    // checkElectricBallPositionAndMove() {
-
-    //     for (let i = 0; i < this.electricGroup.getChildren().length; i++) {
-           
-    //             if (this.electricGroup.getChildren()[i].y < 55) {
-    //                 this.electricGroup.getChildren()[i].setVelocityY(200);
-    //             } 
-        
-    //             if (this.electricGroup.getChildren()[i].y > 680) {
-    //                 this.electricGroup.getChildren()[i].setVelocityY(-200);
-    //             }
-    //     }
-    // }
-    //-------------------- Colliders ---------------------//
+    
+    // -------------------- Colliders ---------------------//
 
     //Create both collider for player death and removing armor upon collision
     //Set damage (death) collider true, health collider false
@@ -968,7 +1098,7 @@ class PlayScene extends Phaser.Scene {
 
         this.anims.create(this.snakeBolt);
        
-        this.snakeBoltObject = this.damageGroup.create(this.snake.x - 180, this.snake.y, 'snakeBolt').play('snakeBoltAnimation');
+        this.snakeBoltObject = this.snakeBoltGroup.create(this.snake.x - 180, this.snake.y, 'snakeBolt').play('snakeBoltAnimation');
         this.snakeBoltObject.setScale(.5);
         this.snakeBoltObject.setSize(140,30);
         this.snakeBoltObject.setVelocityX(-400);

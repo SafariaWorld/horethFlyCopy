@@ -1,8 +1,6 @@
 import Phaser from "phaser";
 import WebFontFile from '../WebFontFile';
-
-
-
+import HealthBar from "../playerSystems/healthBar";
 
 class PlayScene extends Phaser.Scene {
 
@@ -69,6 +67,9 @@ class PlayScene extends Phaser.Scene {
         this.armor = null;
         this.armorCollectSound = null;
         this.armorCollected = false;
+
+        //playerHealth
+        this.currentHealth = 1;
 
         //playerDamage Group
         this.playerDamageGroup = null;
@@ -200,7 +201,15 @@ class PlayScene extends Phaser.Scene {
         //spawn first group
         this.spawnGroup1();
         this.groupOneUp = true;
+
+        //healthbar
+        this.createHealthBar();
+        //this.healthBar();
     }
+
+    //!!!!!!!                                  !!!!!!!!
+    //!!!!!!!      UPDATE FUNCTION BELOW       !!!!!!!!
+    //!!!!!!!                                  !!!!!!!!
 
     update() {
         //parralax background movement
@@ -274,9 +283,20 @@ class PlayScene extends Phaser.Scene {
             this.setMusic();
             this.activateMuteButton();
         }
+        
 
         //******Below are item factory specific updates
-        //fireballs
+        //[1] Group 1 is created on start. 
+        //[2] Once last item reaches 200x position, group 2 is spawned
+        //[3] Once last item reaches -700x position, group 1 is destroyed.
+        //[4] Repeat except group 2 will get destroyed and group1 will spawn...
+        //      repeats keeps cycling the 2 groups.
+        //[5] The functions: this.destroyGroup1..2 and this.spawnGroup1..2 are...
+        //      calling the itemFactory ---> gets key from keyBank  ---> spawns
+        //      damage objects accordingly to key
+        
+        
+        //Group 1 - destroy
         if (this.damageGroup.getChildren().length > 0) {
             if (this.damageGroup.getChildren()[this.damageGroup.getChildren().length - 1].x < -700) {
                 this.destroyGroup1();
@@ -287,7 +307,7 @@ class PlayScene extends Phaser.Scene {
             }
         }
 
-        //fireballs
+        //Group 2 - spawn
         if (this.damageGroup.getChildren().length > 0) {
             if (this.damageGroup.getChildren()[this.damageGroup.getChildren().length - 1].x < 200 && this.groupTwoUp == false) {
                 
@@ -299,9 +319,8 @@ class PlayScene extends Phaser.Scene {
             }
         }
 
-        //electricballs
+        //Group 2 - destroy
         if (this.damageGroup2.getChildren().length > 0) {
-            //console.log('g2 start');
             if (this.damageGroup2.getChildren()[this.damageGroup2.getChildren().length - 1].x < -700) {
                 this.destroyGroup2();
                 this.groupTwoUp = false; //switch so only spins up once on destroy
@@ -310,9 +329,8 @@ class PlayScene extends Phaser.Scene {
             }
         }
         
-        //electricballs
+        //Group 1 - Spawn
         if (this.damageGroup2.getChildren().length > 0) {
-            //console.log('g2 start');
             if (this.damageGroup2.getChildren()[this.damageGroup2.getChildren().length - 1].x < 200 && this.groupOneUp == false) {
                 this.spawnGroup1();
                 this.groupOneUp = true; //switch so only spins up once on destroy
@@ -324,9 +342,19 @@ class PlayScene extends Phaser.Scene {
         if (this.electricball) {
             this.checkElectricBallPositionAndMove();
         }
-    } //update function above
+    } 
+    
+    //!!!!!!!                                  !!!!!!!!
+    //!!!!!!!      UPDATE FUNCTION ABOVE       !!!!!!!!
+    //!!!!!!!                                  !!!!!!!!
 
 
+    createHealthBar() {
+
+        this.healthBar = new HealthBar(this, 255, 85);
+        //this.healthBar.setFrame(this.currentHealth);
+
+    }
 
 
     /****** Item Factory ******/
@@ -334,12 +362,17 @@ class PlayScene extends Phaser.Scene {
     /******  1. itemFactory - produces objects. Accepts key */
     /******  2. keyBank - owns keys. Transfers keys to item Factory. */
     /******               passed into itemFactory*/
+
+    /***************** THESE FUNCTIONS below CALL itemFactory function */
+
     /******  3. destroyGroup1 - destroy Group1 via clear*/
     /******  4. spawnGroup1 -  send call to keyBank to spawn objects*/
     /******  5. destroyGroup2 - destroy Group2 via clear*/
     /******  6. spawnGroup2 - send call to keyBank to spawn objects */
     
-    /****** refer to documentation for more information */
+    /****** refer to documentation for more information and update comments 
+     * for more info on the Item Factory
+    */
     
      itemFactory(key, insertedGroupFire, insertedGroupElectric) {
 
@@ -397,6 +430,8 @@ class PlayScene extends Phaser.Scene {
         console.log(this.electricGroup.getChildren(), "-electric group")
         console.log(this.damageGroup2.getChildren(), "-damage group2")
         console.log(this.electricGroup2.getChildren(), "-electric group2")
+
+        this.createCollisions();
      }
 
      destroyGroup1() {
@@ -469,7 +504,6 @@ class PlayScene extends Phaser.Scene {
         return key[this.keyCounter - 1];
     }
 
-    //up and down movement
     createElectricballMovement() {
 
         if (this.electricball.y > 600) {
@@ -479,6 +513,85 @@ class PlayScene extends Phaser.Scene {
         }
         
     }
+
+    createGroups() {
+
+        //2 groups per section allows for cycling groups
+        this.damageGroup = this.physics.add.group();
+        this.electricGroup = this.physics.add.group();
+        this.damageGroup2 = this.physics.add.group();
+        this.electricGroup2 = this.physics.add.group();
+        this.snakeBoltGroup = this.physics.add.group();
+    }
+
+    createCollisions() {
+        this.damageCollider = this.physics.add.collider(this.player, this.electricGroup, () => {
+            this.player.setGravityY(300);
+                    //console.log('add pause');
+            this.physics.pause();
+            this.time.addEvent({
+                delay: 500,
+                callback: ()=>{
+                            
+                this.endScreen();
+                            
+                },
+                loop: false
+            })
+                        
+        });
+
+        this.damageCollider2 = this.physics.add.collider(this.player, this.electricGroup2, () => {
+            this.player.setGravityY(300);
+                    //console.log('add pause');
+            this.physics.pause();
+            this.time.addEvent({
+                delay: 500,
+                callback: ()=>{
+                            
+                this.endScreen();
+                            
+                },
+                loop: false
+            })
+                        
+        });
+
+        this.fireCollider = this.physics.add.collider(this.player, this.damageGroup, () => {
+            this.player.setGravityY(300);
+                    //console.log('add pause');
+            this.physics.pause();
+            this.time.addEvent({
+                delay: 500,
+                callback: ()=>{
+                            
+                this.endScreen();
+                            
+                },
+                loop: false
+            })
+                        
+        });
+
+        this.fireCollider2 = this.physics.add.collider(this.player, this.damageGroup2, () => {
+            this.player.setGravityY(300);
+            //console.log('add pause');
+            this.physics.pause();
+            this.time.addEvent({
+                delay: 500,
+                callback: ()=>{
+                            
+                this.endScreen();
+                            
+                },
+                loop: false
+            })
+                        
+        });
+
+    }
+
+    
 
     //Unsure why this works at the moment, but without the electricballs don't appear
     checkElectricBallPositionAndMove() {
@@ -504,14 +617,9 @@ class PlayScene extends Phaser.Scene {
                 this.electricGroup2.getChildren()[i].setVelocityY(-200);
             }   
         }
-
-
     }
 
-    
-
-    //*********************after update**************************//
-    //Game Function for Phaser function "update"
+    //Setting controls of player
     setControls() {
         const {left, right} = this.cursors;
 
@@ -716,17 +824,6 @@ class PlayScene extends Phaser.Scene {
         this.foreground = this.add.tileSprite(750, 488, 2500, 720, 'foreground');
         this.foreground.setScale(.65);
         this.clouds = this.add.tileSprite(1250, 360, 2540, 720, 'clouds');
-    }
-
-    createGroups() {
-
-        //2 groups per section allows for cycling groups
-        this.damageGroup = this.physics.add.group();
-        this.electricGroup = this.physics.add.group();
-        this.damageGroup2 = this.physics.add.group();
-        this.electricGroup2 = this.physics.add.group();
-
-        this.snakeBoltGroup = this.physics.add.group();
     }
 
     createFireAndElectricAnimation() {

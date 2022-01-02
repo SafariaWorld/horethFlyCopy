@@ -83,7 +83,7 @@ class PreloadScene extends Phaser.Scene {
         this.load.spritesheet('coinAnimated', 'assets/coinGoldSpriteSheet.png',{ frameWidth: 84, frameHeight: 84 });
 
         //healthbar
-        this.load.spritesheet('healthBar', 'assets/healthBarSpriteSheet.png', {frameWidth: 298, frameHeight: 58}) 
+        this.load.spritesheet('healthBar', 'assets/healthBarSpriteSheet.png', {frameWidth: 298, frameHeight: 58}); 
         
 
         //this.load.image('snake','assets/snake.png');

@@ -24,7 +24,7 @@ class TitleScene extends Phaser.Scene {
 	}
 
 	create() {
-        this.startMusic = this.sound.add('startMusic', {volume: 0.3});
+        this.startMusic = this.sound.add('startMusic', {volume: 0});
         this.startMusic.play();
         const { width, height } = this.sys.game.canvas;
         const bg = this.add.sprite(0,0,'background');
